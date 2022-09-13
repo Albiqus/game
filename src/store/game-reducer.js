@@ -3,8 +3,10 @@ import {
 } from "../utils/getRandomNumber";
 
 const SET_POSITION = 'SET_POSITION'
+
 const MOVE_LINE = 'MOVE_LINE'
 const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
+const CHECK_PLAYER_LOCATION = 'CHECK_PLAYER_LOCATION'
 
 const startState = {
     gameArea: [
@@ -475,16 +477,28 @@ const startState = {
         }]
     ],
     playerPositionId: 120,
-    lineIds: [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211],
+    lifeStatus: true,
+    score: 0,
+
+    lineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
     currentLine: 1,
-    randomLineIndexElement: 7,
-    emptyElementId: 106
+    emptyElementId: 106,
+
+    secondLineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
+    secondLineStatus: false,
+    currentSecondLine: 0,
+    secondEmptyElementId: 106,
+
+    thirdLineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
+    thirdLineStatus: false,
+    currentThirdLine: 0,
+    thirdEmptyElementId: 106,
 }
 
-const topEdgeElements = [8, 23, 38, 53, 68, 83, 98, 113, 128, 143, 158, 173, 188, 203, 218];
-const rightEdgeElements = [218, 219, 220, 221, 222, 223, 224, 225];
+const topEdgeElements = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211];
+const rightEdgeElements = [211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225];
 const bottomEdgeElements = [15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225];
-const leftEdgeElements = [8, 9, 10, 11, 12, 13, 14, 15];
+const leftEdgeElements = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 export const gameReducer = (state = startState, action) => {
     switch (action.type) {
@@ -520,54 +534,176 @@ export const gameReducer = (state = startState, action) => {
                 playerPositionId: newPlayerPositionId
             }
         }
+        case CHECK_PLAYER_LOCATION: {
+            let newLifeStatus = state.lifeStatus
+
+            const isAlivePlayer = () => {
+                const firstLineIds = state.lineIds
+                const secondLineIds = state.secondLineIds
+                const thirdLineIds = state.thirdLineIds
+                const playerPositionId = state.playerPositionId
+                if (firstLineIds.includes(playerPositionId) || secondLineIds.includes(playerPositionId) || thirdLineIds.includes(playerPositionId)) {
+                    return false
+                }
+                return true
+            }
+
+            newLifeStatus = isAlivePlayer()
+
+            return {
+                ...state,
+                lifeStatus: newLifeStatus
+            }
+        }
         case MOVE_LINE: {
 
             let newLineIds = [...state.lineIds]
-            for (let i = 0; i < newLineIds.length; i++) {
-                if (bottomEdgeElements.includes(newLineIds[i])) {
-                    newLineIds[i] = newLineIds[i] - 14
-                } else {
-                    newLineIds[i]++
+            let newEmptyElementId;
+            
+            const moveLine = () => {
+                for (let i = 0; i < newLineIds.length; i++) {
+                    if (state.currentLine === 15) {
+                        newLineIds[i] = newLineIds[i] - 14
+                        if (newLineIds[i] === 1000) {
+                            newLineIds[i] = state.emptyElementId
+                        }
+                    } else {
+                        newLineIds[i]++
+                    }
                 }
+                if (state.currentLine === 15) {
+                    let randomNumber = getRandomNumber(1, 14)
+                    newEmptyElementId = newLineIds[randomNumber]
+                    newLineIds[randomNumber] = 1000
+                }
+                if (typeof (newEmptyElementId) === 'undefined') {
+                    newEmptyElementId = state.emptyElementId
+                }
+            }
+            moveLine()
+
+            let newSecondLineIds = [...state.secondLineIds]
+            let newSecondEmptyElementId = state.secondEmptyElementId
+            const moveSecondLine = () => {
+                for (let i = 0; i < newSecondLineIds.length; i++) {
+                    if (state.currentSecondLine === 15) {
+                        newSecondLineIds[i] = newSecondLineIds[i] - 14
+                        if (newSecondLineIds[i] === 1000) {
+                            newSecondLineIds[i] = state.secondEmptyElementId
+                        }
+                    } else {
+                        newSecondLineIds[i]++
+                    }
+                }
+                if (state.currentSecondLine === 15) {
+                    let randomNumber = getRandomNumber(1, 14)
+                    newSecondEmptyElementId = newSecondLineIds[randomNumber]
+                    newSecondLineIds[randomNumber] = 1000
+                }
+
+            }
+            if (state.secondLineStatus) {
+                moveSecondLine()
+            }
+
+
+            let newThirdLineIds = [...state.thirdLineIds]
+            let newThirdEmptyElementId = state.thirdEmptyElementId
+            const moveThirdLine = () => {
+                for (let i = 0; i < newThirdLineIds.length; i++) {
+                    if (state.currentThirdLine === 15) {
+                        newThirdLineIds[i] = newThirdLineIds[i] - 14
+                        if (newThirdLineIds[i] === 1000) {
+                            newThirdLineIds[i] = state.thirdEmptyElementId
+                        }
+                    } else {
+                        newThirdLineIds[i]++
+                    }
+                }
+                if (state.currentThirdLine === 15) {
+                    let randomNumber = getRandomNumber(1, 14)
+                    newThirdEmptyElementId = newThirdLineIds[randomNumber]
+                    newThirdLineIds[randomNumber] = 1000
+                }
+
+            }
+            if (state.thirdLineStatus) {
+                moveThirdLine()
             }
 
             return {
                 ...state,
-                lineIds: newLineIds
+                lineIds: newLineIds,
+                emptyElementId: newEmptyElementId,
+                secondLineIds: newSecondLineIds,
+                secondEmptyElementId: newSecondEmptyElementId,
+                thirdLineIds: newThirdLineIds,
+                thirdEmptyElementId: newThirdEmptyElementId,
             }
         }
         case SET_CURRENT_LINE: {
-
+            let newScore = state.score
             let newCurrentLine = state.currentLine
-            let newLineIds = [...state.lineIds]
-            let newRandomLineIndexElement;
-            let newEmptyElementId;
+            const setCurrentLine = () => {
+                if (state.currentLine === 15) {
+                    newScore++
+                    newCurrentLine = 1
+                } else {
+                    newCurrentLine++
+                }
+            }
+            setCurrentLine()
 
-            if (state.currentLine === 1) {
-                newEmptyElementId = newLineIds[state.randomLineIndexElement] - 1 
-                newLineIds[state.randomLineIndexElement] = 1000
+            let newSecondLineStatus = state.secondLineStatus
+            const setSecondLineStatus = () => {
+                if (newCurrentLine === 6) {
+                    newSecondLineStatus = true
+                }
+            }
+            setSecondLineStatus()
+
+            let newThirdLineStatus = state.thirdLineStatus
+            const setThirdLineStatus = () => {
+                if (newCurrentLine === 11) {
+                    newThirdLineStatus = true
+                }
+            }
+            setThirdLineStatus()
+
+            let newCurrentSecondLine = state.currentSecondLine
+            const setCurrentSecondLine = () => {
+                if (state.currentSecondLine === 15) {
+                    newScore++
+                    newCurrentSecondLine = 1
+                } else {
+                    newCurrentSecondLine++
+                }
+            }
+            if (newSecondLineStatus) {
+                setCurrentSecondLine()
             }
 
-            if (state.currentLine === 15) {
-                newCurrentLine = 1
-                newLineIds[state.randomLineIndexElement] = state.emptyElementId
-                newRandomLineIndexElement = getRandomNumber(1,14)
-            } else {
-                newCurrentLine++
+            let newCurrentThirdLine = state.currentThirdLine
+            const setCurrentThirdLine = () => {
+                if (state.currentThirdLine === 15) {
+                    newScore++
+                    newCurrentThirdLine = 1
+                } else {
+                    newCurrentThirdLine++
+                }
             }
-            if (typeof (newRandomLineIndexElement) === 'undefined') {
-                newRandomLineIndexElement = state.randomLineIndexElement
+            if (newThirdLineStatus) {
+                setCurrentThirdLine()
             }
-            if (typeof (newEmptyElementId) === 'undefined') {
-                 newEmptyElementId = state.emptyElementId
-            }
+
             return {
                 ...state,
                 currentLine: newCurrentLine,
-                lineIds: newLineIds,
-                randomLineIndexElement: newRandomLineIndexElement,
-                emptyElementId: newEmptyElementId,
-
+                secondLineStatus: newSecondLineStatus,
+                currentSecondLine: newCurrentSecondLine,
+                thirdLineStatus: newThirdLineStatus,
+                currentThirdLine: newCurrentThirdLine,
+                score: newScore
             }
         }
         default:
@@ -591,3 +727,7 @@ export const setCurrentLine = (currentLine) => ({
     currentLine
 })
 
+
+export const checkPplayerLocation = () => ({
+    type: CHECK_PLAYER_LOCATION,
+})
