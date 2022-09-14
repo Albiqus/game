@@ -3,6 +3,7 @@
     height: 900px;
     width: 900px;
     display: flex;
+    border: 5px solid black;
 }
 
 .element {
@@ -30,6 +31,8 @@
     flex-direction: column;
 }
 
+
+
 .loseText {
     margin: 0 auto;
     margin-top: 60px;
@@ -42,4 +45,22 @@
     margin-top: 60px;
     font-family: "gameFont";
     font-size: 60px;
+}
+
+.restartButton {
+    margin: 0 auto;
+    margin-top: 360px;
+    font-family: "gameFont";
+    font-size: 60px;
+    width: 400px;
+    height: 150px;
+    border: 5px solid black;
+
+}
+
+.restartButton:hover {
+    cursor: pointer;
+    margin-top: 335px;
+    width: 450px;
+    height: 200px;
 }

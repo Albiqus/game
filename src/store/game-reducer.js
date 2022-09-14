@@ -7,6 +7,8 @@ const SET_POSITION = 'SET_POSITION'
 const MOVE_LINE = 'MOVE_LINE'
 const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
 const CHECK_PLAYER_LOCATION = 'CHECK_PLAYER_LOCATION'
+const RESSURECT_PLAYER = 'RESSURECT_PLAYER'
+const RESET_SETTINGS = 'RESET_SETTINGS'
 
 const startState = {
     gameArea: [
@@ -505,23 +507,23 @@ export const gameReducer = (state = startState, action) => {
         case SET_POSITION: {
             let newPlayerPositionId = state.playerPositionId
             switch (action.payload.direction) {
-                case 'ArrowUp': {
+                case 'ArrowUp': case 'w': {
                     if (!topEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId - 1
                     }
                     break
                 }
-                case 'ArrowRight':
+                case 'ArrowRight': case 'd':
                     if (!rightEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId + 15
                     }
                     break
-                case 'ArrowDown':
+                case 'ArrowDown': case 's':
                     if (!bottomEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId + 1
                     }
                     break
-                case 'ArrowLeft':
+                case 'ArrowLeft': case 'a':
                     if (!leftEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId - 15
                     }
@@ -535,6 +537,7 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case CHECK_PLAYER_LOCATION: {
+
             let newLifeStatus = state.lifeStatus
 
             const isAlivePlayer = () => {
@@ -555,11 +558,41 @@ export const gameReducer = (state = startState, action) => {
                 lifeStatus: newLifeStatus
             }
         }
+        case RESSURECT_PLAYER: {
+
+            let newLifeStatus = true
+            return {
+                ...state,
+                lifeStatus: newLifeStatus
+            }
+        }
+        case RESET_SETTINGS: {
+            return {
+                ...state,
+                playerPositionId: 120,
+                score: 0,
+
+                lineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
+                currentLine: 1,
+                emptyElementId: 106,
+
+                secondLineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
+                secondLineStatus: false,
+                currentSecondLine: 0,
+                secondEmptyElementId: 106,
+
+                thirdLineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
+                thirdLineStatus: false,
+                currentThirdLine: 0,
+                thirdEmptyElementId: 106,
+
+            }
+        }
         case MOVE_LINE: {
 
             let newLineIds = [...state.lineIds]
             let newEmptyElementId;
-            
+
             const moveLine = () => {
                 for (let i = 0; i < newLineIds.length; i++) {
                     if (state.currentLine === 15) {
@@ -642,6 +675,7 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_CURRENT_LINE: {
+
             let newScore = state.score
             let newCurrentLine = state.currentLine
             const setCurrentLine = () => {
@@ -728,6 +762,15 @@ export const setCurrentLine = (currentLine) => ({
 })
 
 
-export const checkPplayerLocation = () => ({
+export const checkPlayerLocation = () => ({
     type: CHECK_PLAYER_LOCATION,
 })
+
+export const resurrectPlayer = () => ({
+    type: RESSURECT_PLAYER
+})
+
+export const resetSettings = () => ({
+    type: RESET_SETTINGS
+})
+

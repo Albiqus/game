@@ -5,16 +5,21 @@ import classes from './Score.module.css';
 
 const Score = (props) => {
 
-    return (
-        <div>
-            <p className={classes.gameScore}>{props.score}</p>
-        </div>
-    )
+    if (props.lifeStatus) {
+        return (
+            <div>
+                <p className={classes.gameScore}>{props.score}</p>
+            </div>
+        )
+    }
+
+
 }
 
 const mapStateToProps = (state) => {
     return {
-        score: state.data.score
+        score: state.data.score,
+        lifeStatus: state.data.lifeStatus
     }
 }
 
