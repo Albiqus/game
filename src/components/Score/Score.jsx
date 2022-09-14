@@ -5,7 +5,7 @@ import classes from './Score.module.css';
 
 const Score = (props) => {
 
-    if (props.lifeStatus) {
+    if (props.gameStatus) {
         return (
             <div>
                 <p className={classes.gameScore}>{props.score}</p>
@@ -19,7 +19,9 @@ const Score = (props) => {
 const mapStateToProps = (state) => {
     return {
         score: state.data.score,
-        lifeStatus: state.data.lifeStatus
+        deathModalStatus: state.death.modalStatus,
+        menuModalStatus: state.menu.modalStatus,
+        gameStatus: state.data.gameStatus
     }
 }
 

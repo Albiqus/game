@@ -1,0 +1,66 @@
+.menuModal {
+    margin: 0 auto;
+    height: 900px;
+    width: 900px;
+    background-color: pink;
+    border: 5px solid black;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: flex-start;
+    justify-content: space-around
+}
+
+.characterText {
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    font-family: "gameFont";
+    font-size: 60px;
+    height: 100px;
+    width: 900px;
+
+}
+
+.selected {
+    outline: 15px solid rgb(255, 255, 255);
+    outline-offset: 15px;
+}
+
+.character {
+    width: 180px;
+    height: 180px;
+}
+
+.red {
+    background-image: url(../../../public/characters/character-red-180x180.png);
+}
+
+.green {
+    background-image: url(../../../public/characters/character-green-180x180.png);
+}
+
+.blue {
+    background-image: url(../../../public/characters/character-blue-180x180.png);
+}
+
+.character:hover {
+    outline: 15px solid rgb(255, 255, 255);
+    outline-offset: 15px;
+    cursor: pointer;
+}
+
+.startButton {
+    margin-top: 100px;
+    font-family: "gameFont";
+    font-size: 60px;
+    width: 400px;
+    height: 150px;
+    border: 5px solid black;
+}
+
+.startButton:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+}

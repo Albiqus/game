@@ -3,7 +3,7 @@
 import { connect } from "react-redux"
 import classes from './GameArea.module.css';
 import React, { useCallback, useEffect, useState } from "react";
-import { checkPlayerLocation, moveLine, resetSettings, resurrectPlayer, setCurrentLine, setPosition } from "../../store/game-reducer";
+import { checkPlayerLocation, moveLine, resetSettings, setCurrentLine, setPosition } from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
 
 const DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'd', 's', 'a']
@@ -27,23 +27,38 @@ const GameArea = (props) => {
         return () => {
             clearInterval(intervalId)
         }
-    }, [props.lifeStatus]);
+    }, [props.gameStatus]);
+
 
     useEffect(() => {
-        if (!props.lifeStatus) {
+        if (!props.menuModalStatus && !props.gameStatus) {
             props.setDeathModalStatus(true)
-            clearInterval(intervalIdToReset)
-        } else {
-            props.setDeathModalStatus(false)
-            props.resetSettings()
         }
-    }, [intervalIdToReset, props.lifeStatus]);
+    }, [props.gameStatus, props.menuModalStatus])
+
+    useEffect(() => {
+        if (!props.gameStatus) {
+            clearInterval(intervalIdToReset)
+        }
+    }, [intervalIdToReset, props.gameStatus]);
 
     const gameAreaElements = props.gameArea.map(row => (
         <div key={row[0].id}>
             {row.map(element => {
                 let className = classes.element;
                 if (props.playerPositionId === element.id) {
+                    switch (props.characterSelected) {
+                        case 'red':
+                            className += ` ${classes.characterRed}`
+                            break
+                        case 'green':
+                            className += ` ${classes.characterGreen}`
+                            break
+                        case 'blue':
+                            className += ` ${classes.characterBlue}`
+                            break
+                        default:
+                    }
                     className += ` ${classes.player}`
                 }
                 if (props.lineIds.includes(element.id)) {
@@ -64,33 +79,20 @@ const GameArea = (props) => {
             props.setPosition(e.key)
             props.checkPlayerLocation()
         }
-
     }
 
     const area = React.useRef()
     useEffect(() => {
         area.current?.focus()
-    }, [area, props.deathModalStatus]);
-  
-    const onRestartButtonClick = () => {
-        props.resurrectPlayer()
-    }
+    }, [area, props.gameStatus]);
 
-    if (props.deathModalStatus) {
+    if (props.gameStatus) {
         return (
-            <div className={classes.deathModal}>
-                <p className={classes.loseText}>вы проиграли</p>
-                <p className={classes.score}>счёт:{props.score}</p>
-                <button onClick={onRestartButtonClick} className={classes.restartButton}>играть заново</button>
+            <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
+                {gameAreaElements}
             </div>
         )
     }
-
-    return (
-        <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
-            {gameAreaElements}
-        </div>
-    )
 }
 
 const mapStateToProps = (state) => {
@@ -103,12 +105,14 @@ const mapStateToProps = (state) => {
         secondLineStatus: state.data.secondLineStatus,
         thirdLineIds: state.data.thirdLineIds,
         thirdLineStatus: state.data.thirdLineStatus,
-        lifeStatus: state.data.lifeStatus,
         deathModalStatus: state.death.modalStatus,
-        score: state.data.score
+        menuModalStatus: state.menu.modalStatus,
+        score: state.data.score,
+        characterSelected: state.menu.characterSelected,
+        gameStatus: state.data.gameStatus
     }
 }
 
-const GameAreaContainer = connect(mapStateToProps, { setPosition, moveLine, setCurrentLine, checkPlayerLocation, setDeathModalStatus, resurrectPlayer, resetSettings })(GameArea)
+const GameAreaContainer = connect(mapStateToProps, { setPosition, moveLine, setCurrentLine, checkPlayerLocation, setDeathModalStatus, resetSettings })(GameArea)
 
 export { GameAreaContainer }

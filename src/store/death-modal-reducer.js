@@ -1,4 +1,4 @@
-const SET_MODAL_STATUS = 'SET_MODAL_STATUS'
+const SET_DEATH_MODAL_STATUS = 'SET_DEATH_MODAL_STATUS'
 
 const startState = {
 modalStatus: false
@@ -7,7 +7,7 @@ modalStatus: false
 
 export const deathModalReducer = (state = startState, action) => {
     switch (action.type) {
-        case SET_MODAL_STATUS: {
+        case SET_DEATH_MODAL_STATUS: {
             let newModalStatus = action.status
             return {
                 ...state,
@@ -20,5 +20,5 @@ export const deathModalReducer = (state = startState, action) => {
 }
 
 export const setDeathModalStatus = (status) => ({
-    type: SET_MODAL_STATUS, status
+    type: SET_DEATH_MODAL_STATUS, status
 })

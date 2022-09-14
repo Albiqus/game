@@ -2,15 +2,17 @@ import {
     getRandomNumber
 } from "../utils/getRandomNumber";
 
+const SET_GAME_STATUS = 'SET_GAME_STATUS'
 const SET_POSITION = 'SET_POSITION'
 
 const MOVE_LINE = 'MOVE_LINE'
 const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
 const CHECK_PLAYER_LOCATION = 'CHECK_PLAYER_LOCATION'
-const RESSURECT_PLAYER = 'RESSURECT_PLAYER'
 const RESET_SETTINGS = 'RESET_SETTINGS'
 
+
 const startState = {
+    gameStatus: false,
     gameArea: [
         [{
             id: 1
@@ -479,7 +481,6 @@ const startState = {
         }]
     ],
     playerPositionId: 120,
-    lifeStatus: true,
     score: 0,
 
     lineIds: [1, 16, 31, 46, 61, 76, 91, 1000, 121, 136, 151, 166, 181, 196, 211],
@@ -504,6 +505,12 @@ const leftEdgeElements = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 export const gameReducer = (state = startState, action) => {
     switch (action.type) {
+         case SET_GAME_STATUS: {
+             return {
+                 ...state,
+                 gameStatus: action.status
+             }
+         }
         case SET_POSITION: {
             let newPlayerPositionId = state.playerPositionId
             switch (action.payload.direction) {
@@ -538,32 +545,25 @@ export const gameReducer = (state = startState, action) => {
         }
         case CHECK_PLAYER_LOCATION: {
 
-            let newLifeStatus = state.lifeStatus
-
+            let newGameStatus;
             const isAlivePlayer = () => {
                 const firstLineIds = state.lineIds
                 const secondLineIds = state.secondLineIds
                 const thirdLineIds = state.thirdLineIds
                 const playerPositionId = state.playerPositionId
                 if (firstLineIds.includes(playerPositionId) || secondLineIds.includes(playerPositionId) || thirdLineIds.includes(playerPositionId)) {
-                    return false
+                    newGameStatus = false
+                } else {
+                    newGameStatus = true
                 }
-                return true
+                
             }
 
-            newLifeStatus = isAlivePlayer()
+            isAlivePlayer()
 
             return {
                 ...state,
-                lifeStatus: newLifeStatus
-            }
-        }
-        case RESSURECT_PLAYER: {
-
-            let newLifeStatus = true
-            return {
-                ...state,
-                lifeStatus: newLifeStatus
+                gameStatus: newGameStatus
             }
         }
         case RESET_SETTINGS: {
@@ -746,6 +746,10 @@ export const gameReducer = (state = startState, action) => {
 }
 
 
+export const setGameStatus = (status) => ({
+    type: SET_GAME_STATUS, status
+})
+
 export const setPosition = (direction) => ({
     type: SET_POSITION,
     payload: {
@@ -764,10 +768,6 @@ export const setCurrentLine = (currentLine) => ({
 
 export const checkPlayerLocation = () => ({
     type: CHECK_PLAYER_LOCATION,
-})
-
-export const resurrectPlayer = () => ({
-    type: RESSURECT_PLAYER
 })
 
 export const resetSettings = () => ({
