@@ -52,10 +52,10 @@
 }
 
 .startButton {
-    margin-top: 100px;
+    margin-top: 75px;
     font-family: "gameFont";
     font-size: 60px;
-    width: 400px;
+    width: 600px;
     height: 150px;
     border: 5px solid black;
 }
@@ -64,3 +64,52 @@
     cursor: pointer;
     transform: scale(1.2);
 }
+
+.settingsButton {
+    margin-top: 75px;
+    font-family: "gameFont";
+    font-size: 60px;
+    width: 600px;
+    height: 150px;
+    border: 5px solid black;
+}
+
+.settingsButton:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+}
+
+.musicVolume{
+    width: 600px;
+    margin-top: 20px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+   .musicVolume::-webkit-slider-thumb {
+       background: #ecf0f1;
+       border: 5px solid rgb(0, 0, 0);
+       cursor: pointer;
+       width: 15px;
+       height: 15px;
+       transform: scaleY(3);
+       -webkit-appearance: none;
+   }
+
+   .musicVolume::-webkit-slider-runnable-track {
+       height: 15px;
+       outline: 5px solid rgb(0, 0, 0);
+       background-color: rgb(255, 255, 255);
+   }
+
+   .musicVolumeText{
+     text-align: center;
+     margin: 0 auto;
+     margin-top: 50px;
+     font-family: "gameFont";
+     font-size: 30px;
+   }
+
+   .volume{
+    margin-top: 80px;
+   }

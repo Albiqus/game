@@ -4,7 +4,6 @@ import { gameReducer } from "./game-reducer";
 import { menuModalReducer } from "./menu-modal-reducer";
 
 
-
 let reducers = combineReducers({
     data: gameReducer,
     death: deathModalReducer,

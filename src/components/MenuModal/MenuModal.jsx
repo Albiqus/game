@@ -1,8 +1,11 @@
 
 import { connect } from "react-redux"
-import { setGameStatus } from "../../store/game-reducer";
-import { setCharacterSelected, setMenuModalStatus } from "../../store/menu-modal-reducer";
+import { resetSettings, setGameStatus } from "../../store/game-reducer";
+import { setCharacterSelected, setMenuModalStatus, setMusicVolume } from "../../store/menu-modal-reducer";
 import classes from './MenuModal.module.css';
+import sound from '../../music/menu.mp3'
+import { useEffect } from "react";
+import React from "react";
 
 const MenuModal = (props) => {
 
@@ -36,8 +39,24 @@ const MenuModal = (props) => {
     }
 
     const onStartButtonClick = () => {
-        props.setGameStatus(true)
+        props.resetSettings()
         props.setMenuModalStatus(false)
+        props.setGameStatus(true)
+
+    }
+    
+
+    const audio = React.useRef()
+
+    useEffect(() => {
+        if (audio.current) {
+            audio.current.volume = props.musicVolume / 100
+        }
+    }, [props.menuModalStatus, props.musicVolume])
+
+    const onMusicVolumeChange = (e) => {
+        let volume = e.target.value
+        props.setMusicVolume(volume)
     }
 
     if (props.menuModalStatus) {
@@ -48,6 +67,11 @@ const MenuModal = (props) => {
                 <button onClick={onCharacterGreenButtonClick} className={characterGreen}></button>
                 <button onClick={onCharacterBlueButtonClick} className={characterBlue}></button>
                 <button onClick={onStartButtonClick} className={classes.startButton}>старт</button>
+                <audio ref={audio} src={sound} autoPlay loop muted={false} hidden></audio>
+                <div className={classes.volume}>
+                    <p className={classes.musicVolumeText}>громкость музыки</p>
+                    <input onChange={onMusicVolumeChange} className={classes.musicVolume} type="range" min="0" max="100" value={props.musicVolume} ></input>
+                </div>
             </div>
         )
     }
@@ -59,10 +83,11 @@ const mapStateToProps = (state) => {
     return {
         menuModalStatus: state.menu.modalStatus,
         characterSelected: state.menu.characterSelected,
-        gameStatus: state.data.gameStatus
+        gameStatus: state.data.gameStatus,
+        musicVolume: state.menu.musicVolume
     }
 }
 
-const MenuModalContainer = connect(mapStateToProps, { setCharacterSelected, setGameStatus, setMenuModalStatus })(MenuModal)
+const MenuModalContainer = connect(mapStateToProps, { setCharacterSelected, setGameStatus, setMenuModalStatus, resetSettings, setMusicVolume })(MenuModal)
 
 export { MenuModalContainer }

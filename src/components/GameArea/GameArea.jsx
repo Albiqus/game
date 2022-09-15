@@ -5,6 +5,7 @@ import classes from './GameArea.module.css';
 import React, { useCallback, useEffect, useState } from "react";
 import { checkPlayerLocation, moveLine, resetSettings, setCurrentLine, setPosition } from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
+import sound from '../../music/gameMusic/track1.mp3'
 
 const DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'd', 's', 'a']
 
@@ -34,7 +35,7 @@ const GameArea = (props) => {
         if (!props.menuModalStatus && !props.gameStatus) {
             props.setDeathModalStatus(true)
         }
-    }, [props.gameStatus, props.menuModalStatus])
+    }, [props.gameStatus])
 
     useEffect(() => {
         if (!props.gameStatus) {
@@ -86,10 +87,19 @@ const GameArea = (props) => {
         area.current?.focus()
     }, [area, props.gameStatus]);
 
+    const audio = React.useRef()
+
+    useEffect(() => {
+        if (audio.current) {
+            audio.current.volume = props.musicVolume / 100
+        }
+    }, [props.gameStatus, props.musicVolume])
+
     if (props.gameStatus) {
         return (
             <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
                 {gameAreaElements}
+                <audio ref={audio} src={sound} autoPlay loop muted={false} hidden></audio>
             </div>
         )
     }
@@ -109,7 +119,8 @@ const mapStateToProps = (state) => {
         menuModalStatus: state.menu.modalStatus,
         score: state.data.score,
         characterSelected: state.menu.characterSelected,
-        gameStatus: state.data.gameStatus
+        gameStatus: state.data.gameStatus,
+        musicVolume: state.menu.musicVolume
     }
 }
 
