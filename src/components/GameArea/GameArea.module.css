@@ -28,3 +28,14 @@
     background-image: url(../../../public/line-block.png);
 }
 
+.slowdownEffect {
+     background-image: url(../../../public/bonuses/slowdown.png);
+}
+
+.strengthEffect{
+    background-image: url(../../../public/bonuses/strength.png);
+}
+
+.wideAisleEffect {
+    background-image: url(../../../public/bonuses/wideAisle.png);
+}

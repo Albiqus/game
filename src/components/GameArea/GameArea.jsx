@@ -3,9 +3,11 @@
 import { connect } from "react-redux"
 import classes from './GameArea.module.css';
 import React, { useCallback, useEffect, useState } from "react";
-import { checkPlayerLocation, moveLine, resetSettings, setCurrentLine, setPosition } from "../../store/game-reducer";
+import { checkBonus, checkPlayerLocation, moveBonus, moveLine, resetSettings, setCurrentLine, setBonus, setPosition, removeWasteBonus} from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
-import sound from '../../music/gameMusic/track1.mp3'
+import { gameMusics } from "../../data/data";
+import { getRandomNumber } from "../../utils/getRandomNumber";
+
 
 const DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'd', 's', 'a']
 
@@ -16,13 +18,17 @@ const GameArea = (props) => {
     const myCallback = useCallback(() => {
         props.moveLine()
         props.setCurrentLine()
+        props.moveBonus()
+        props.removeWasteBonus()
         props.checkPlayerLocation()
+        props.checkBonus()
     }, [props])
+
 
 
     // вызывается колбэк (первый аргумент из useEffect) при монтировании (так как пустой массив зависимостей)
     useEffect(() => {
-        const intervalId = setInterval(myCallback, 300);
+        const intervalId = setInterval(myCallback, 350);
         setIntervalIdToReset(intervalId)
         // эта функция вызывается при componentUnMount
         return () => {
@@ -71,11 +77,23 @@ const GameArea = (props) => {
                 if (props.thirdLineIds.includes(element.id) && props.thirdLineStatus) {
                     className += ` ${classes.line}`
                 }
+                
+                if (props.bonuses[0].id === element.id) {
+                    className += ` ${classes.slowdownEffect}`
+                }
+                if (props.bonuses[1].id === element.id) {
+                    className += ` ${classes.strengthEffect}`
+                }
+                if (props.bonuses[2].id === element.id) {
+                    className += ` ${classes.wideAisleEffect}`
+                }
+
                 return <div className={className} key={element.id}></div>
             })}
         </div>
     ))
     const onGameKeyDown = (e) => {
+
         if (DIRECTIONS.includes(e.key)) {
             props.setPosition(e.key)
             props.checkPlayerLocation()
@@ -95,11 +113,33 @@ const GameArea = (props) => {
         }
     }, [props.gameStatus, props.musicVolume])
 
+    let [randomNumber, setRandomNumber] = useState(getRandomNumber(0, 9))
+
+    useEffect(() => {
+        setRandomNumber(getRandomNumber(0, 9))
+    }, [props.gameStatus])
+
+    useEffect(() => {
+        switch (props.currentBonus) {
+            case 'slowdown':
+                props.setBonus('slowdown')
+                break
+            case 'strength':
+                props.setBonus('strength')
+                break
+            case 'wideAisle':
+                props.setBonus('wideAisle')
+                break
+            default:
+        }
+    }, [props.currentBonus])
+
+    
     if (props.gameStatus) {
         return (
             <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
                 {gameAreaElements}
-                <audio ref={audio} src={sound} autoPlay loop muted={false} hidden></audio>
+                <audio ref={audio} src={gameMusics[randomNumber]} autoPlay loop muted={false} hidden></audio>
             </div>
         )
     }
@@ -120,10 +160,24 @@ const mapStateToProps = (state) => {
         score: state.data.score,
         characterSelected: state.menu.characterSelected,
         gameStatus: state.data.gameStatus,
-        musicVolume: state.menu.musicVolume
+        musicVolume: state.menu.musicVolume,
+        currentBonus: state.data.currentBonus,
+        bonusArea: state.data.bonusArea,
+        bonuses: state.data.bonuses
     }
 }
 
-const GameAreaContainer = connect(mapStateToProps, { setPosition, moveLine, setCurrentLine, checkPlayerLocation, setDeathModalStatus, resetSettings })(GameArea)
+const GameAreaContainer = connect(mapStateToProps,
+    {   setPosition,
+        moveLine,
+        setCurrentLine,
+        checkPlayerLocation,
+        setDeathModalStatus,
+        resetSettings,
+        checkBonus,
+        setBonus,
+        moveBonus,
+        removeWasteBonus
+    })(GameArea)
 
 export { GameAreaContainer }

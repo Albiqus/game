@@ -1,4 +1,7 @@
 import {
+    bonuses
+} from "../data/data";
+import {
     getRandomNumber
 } from "../utils/getRandomNumber";
 
@@ -10,6 +13,10 @@ const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
 const CHECK_PLAYER_LOCATION = 'CHECK_PLAYER_LOCATION'
 const RESET_SETTINGS = 'RESET_SETTINGS'
 
+const CHECK_BONUS = 'CHECK_BONUS'
+const SET_BONUS = 'SET_BONUS'
+const MOVE_BONUSES = 'MOVE_BONUSES'
+const REMOVE_WASTE_BONUS = 'REMOVE_WASTE_BONUS'
 
 const startState = {
     gameStatus: false,
@@ -480,6 +487,20 @@ const startState = {
             id: 225
         }]
     ],
+    bonusArea: [3, 18, 33, 48, 63, 78, 93, 108, 123, 138, 153, 168, 183, 198, 213],
+    bonuses: [{
+            id: null,
+            effect: 'slowdown',
+        },
+        {
+            id: null,
+            effect: 'strength'
+        },
+        {
+            id: null,
+            effect: 'wideAisle'
+        }
+    ],
     playerPositionId: 120,
     score: 0,
 
@@ -496,6 +517,9 @@ const startState = {
     thirdLineStatus: false,
     currentThirdLine: 0,
     thirdEmptyElementId: 106,
+
+    bonusCounter: 0,
+    currentBonus: null
 }
 
 const topEdgeElements = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211];
@@ -505,32 +529,36 @@ const leftEdgeElements = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 export const gameReducer = (state = startState, action) => {
     switch (action.type) {
-         case SET_GAME_STATUS: {
-             return {
-                 ...state,
-                 gameStatus: action.status
-             }
-         }
+        case SET_GAME_STATUS: {
+            return {
+                ...state,
+                gameStatus: action.status
+            }
+        }
         case SET_POSITION: {
             let newPlayerPositionId = state.playerPositionId
             switch (action.payload.direction) {
-                case 'ArrowUp': case 'w': {
+                case 'ArrowUp':
+                case 'w': {
                     if (!topEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId - 1
                     }
                     break
                 }
-                case 'ArrowRight': case 'd':
+                case 'ArrowRight':
+                case 'd':
                     if (!rightEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId + 15
                     }
                     break
-                case 'ArrowDown': case 's':
+                case 'ArrowDown':
+                case 's':
                     if (!bottomEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId + 1
                     }
                     break
-                case 'ArrowLeft': case 'a':
+                case 'ArrowLeft':
+                case 'a':
                     if (!leftEdgeElements.includes(state.playerPositionId)) {
                         newPlayerPositionId = state.playerPositionId - 15
                     }
@@ -556,7 +584,7 @@ export const gameReducer = (state = startState, action) => {
                 } else {
                     newGameStatus = true
                 }
-                
+
             }
 
             isAlivePlayer()
@@ -564,6 +592,48 @@ export const gameReducer = (state = startState, action) => {
             return {
                 ...state,
                 gameStatus: newGameStatus
+            }
+        }
+        case CHECK_BONUS: {
+            let newBonusCounter = state.bonusCounter
+            let newCurrentBonus = state.currentBonus
+            if (state.bonusCounter === 10) {
+                const luck = getRandomNumber(0, 1)
+                if (luck === 1) {
+                    console.log('БОНУС')
+                    newCurrentBonus = bonuses[getRandomNumber(0, 2)]
+                } else {
+                    console.log('ХУЙ ТЕБЕ')
+                }
+                newBonusCounter = 0
+            }
+            return {
+                ...state,
+                bonusCounter: newBonusCounter,
+                currentBonus: newCurrentBonus
+            }
+        }
+        case SET_BONUS: {
+            
+            let newBonuses = state.bonuses
+            let randomNumber = getRandomNumber(1, 14)
+            let bonusArea = state.bonusArea
+            if (action.effect === 'slowdown') {
+                newBonuses[0].id = bonusArea[randomNumber]
+                console.log(newBonuses[0].id)
+            }
+            if (action.effect === 'strength') {
+                newBonuses[1].id = bonusArea[randomNumber]
+                console.log(newBonuses[1].id)
+            }
+            if (action.effect === 'wideAisle') {
+                newBonuses[2].id = bonusArea[randomNumber]
+                console.log(newBonuses[2].id)
+            }
+            return {
+                ...state,
+                bonuses: newBonuses,
+                currentBonus: null
             }
         }
         case RESET_SETTINGS: {
@@ -586,6 +656,7 @@ export const gameReducer = (state = startState, action) => {
                 currentThirdLine: 0,
                 thirdEmptyElementId: 106,
 
+                bonusCounter: 0
             }
         }
         case MOVE_LINE: {
@@ -677,10 +748,12 @@ export const gameReducer = (state = startState, action) => {
         case SET_CURRENT_LINE: {
 
             let newScore = state.score
+            let newBonusCounter = state.bonusCounter
             let newCurrentLine = state.currentLine
             const setCurrentLine = () => {
                 if (state.currentLine === 15) {
                     newScore++
+                    newBonusCounter++
                     newCurrentLine = 1
                 } else {
                     newCurrentLine++
@@ -708,6 +781,7 @@ export const gameReducer = (state = startState, action) => {
             const setCurrentSecondLine = () => {
                 if (state.currentSecondLine === 15) {
                     newScore++
+                    newBonusCounter++
                     newCurrentSecondLine = 1
                 } else {
                     newCurrentSecondLine++
@@ -721,6 +795,7 @@ export const gameReducer = (state = startState, action) => {
             const setCurrentThirdLine = () => {
                 if (state.currentThirdLine === 15) {
                     newScore++
+                    newBonusCounter++
                     newCurrentThirdLine = 1
                 } else {
                     newCurrentThirdLine++
@@ -729,7 +804,6 @@ export const gameReducer = (state = startState, action) => {
             if (newThirdLineStatus) {
                 setCurrentThirdLine()
             }
-
             return {
                 ...state,
                 currentLine: newCurrentLine,
@@ -737,9 +811,34 @@ export const gameReducer = (state = startState, action) => {
                 currentSecondLine: newCurrentSecondLine,
                 thirdLineStatus: newThirdLineStatus,
                 currentThirdLine: newCurrentThirdLine,
-                score: newScore
+                score: newScore,
+                bonusCounter: newBonusCounter
             }
         }
+        case MOVE_BONUSES: {
+            let newBonuses = state.bonuses;
+            for (let i = 0; i < newBonuses.length; i++){
+                if (newBonuses[i].id !== null) {
+                    newBonuses[i].id++
+                }
+            }
+                return {
+                    ...state,
+                    bonuses: newBonuses
+                }
+        }
+            case REMOVE_WASTE_BONUS: {
+                let newBonuses = state.bonuses;
+                for (let i = 0; i < newBonuses.length; i++) {
+                    if (bottomEdgeElements.includes(newBonuses[i].id)) {
+                        newBonuses[i].id = null
+                    }
+                }
+                return {
+                    ...state,
+                    bonuses: newBonuses
+                }
+            }
         default:
             return state;
     }
@@ -747,7 +846,8 @@ export const gameReducer = (state = startState, action) => {
 
 
 export const setGameStatus = (status) => ({
-    type: SET_GAME_STATUS, status
+    type: SET_GAME_STATUS,
+    status
 })
 
 export const setPosition = (direction) => ({
@@ -774,3 +874,22 @@ export const resetSettings = () => ({
     type: RESET_SETTINGS
 })
 
+
+export const checkBonus = () => ({
+    type: CHECK_BONUS
+})
+
+
+export const setBonus = (effect) => ({
+    type: SET_BONUS,
+    effect
+})
+
+
+export const moveBonus = () => ({
+    type: MOVE_BONUSES
+})
+
+export const removeWasteBonus = () => ({
+    type: REMOVE_WASTE_BONUS
+})
