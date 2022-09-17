@@ -10,13 +10,16 @@ const SET_POSITION = 'SET_POSITION'
 
 const MOVE_LINE = 'MOVE_LINE'
 const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
-const CHECK_PLAYER_LOCATION = 'CHECK_PLAYER_LOCATION'
+const MAKE_PLAYER_INTERACTION = 'MAKE_PLAYER_INTERACTION'
 const RESET_SETTINGS = 'RESET_SETTINGS'
 
-const CHECK_BONUS = 'CHECK_BONUS'
+const CHECK_BONUS_LUCK = 'CHECK_BONUS_LUCK'
 const SET_BONUS = 'SET_BONUS'
 const MOVE_BONUSES = 'MOVE_BONUSES'
 const REMOVE_WASTE_BONUS = 'REMOVE_WASTE_BONUS'
+
+const SET_SLOWDOWN_EFFECT = 'SET_SLOWDOWN_EFFECT'
+const REDUCE_TIME_SLOWDOWN_EFFECT = 'REDUCE_TIME_SLOWDOWN_EFFECT'
 
 const startState = {
     gameStatus: false,
@@ -487,7 +490,8 @@ const startState = {
             id: 225
         }]
     ],
-    bonusArea: [3, 18, 33, 48, 63, 78, 93, 108, 123, 138, 153, 168, 183, 198, 213],
+
+    bonusArea: [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211],
     bonuses: [{
             id: null,
             effect: 'slowdown',
@@ -501,6 +505,14 @@ const startState = {
             effect: 'wideAisle'
         }
     ],
+    bonusCounter: 0,
+    currentBonus: null,
+
+    effect: null,
+    slowdownEffectSeconds: null,
+    strengthEffectSeconds: null,
+    wideAisleEffectSeconds: null,
+
     playerPositionId: 120,
     score: 0,
 
@@ -518,8 +530,7 @@ const startState = {
     currentThirdLine: 0,
     thirdEmptyElementId: 106,
 
-    bonusCounter: 0,
-    currentBonus: null
+    interval: 350
 }
 
 const topEdgeElements = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211];
@@ -571,7 +582,7 @@ export const gameReducer = (state = startState, action) => {
                 playerPositionId: newPlayerPositionId
             }
         }
-        case CHECK_PLAYER_LOCATION: {
+        case MAKE_PLAYER_INTERACTION: {
 
             let newGameStatus;
             const isAlivePlayer = () => {
@@ -580,27 +591,60 @@ export const gameReducer = (state = startState, action) => {
                 const thirdLineIds = state.thirdLineIds
                 const playerPositionId = state.playerPositionId
                 if (firstLineIds.includes(playerPositionId) || secondLineIds.includes(playerPositionId) || thirdLineIds.includes(playerPositionId)) {
-                    newGameStatus = false
+                    newGameStatus = true // вернуть false
                 } else {
                     newGameStatus = true
                 }
+            }
+            isAlivePlayer()
 
+            let newEffect = state.effect
+            let newBonuses = state.bonuses
+
+            const whetherEffectTaken = () => {
+                const playerPositionId = state.playerPositionId
+                if (newBonuses[0].id === playerPositionId) {
+                    if (newEffect === 'slowdown') {
+                        newEffect = 'new slowdown'
+                    } else {
+                        newEffect = 'slowdown'
+                    }
+                    newBonuses[0].id = null
+                }
+                if (newBonuses[1].id === playerPositionId) {
+                    if (newEffect === 'slowdown') {
+                        newEffect = 'new slowdown'
+                    } else {
+                        newEffect = 'slowdown'
+                    }
+                    newBonuses[1].id = null //не забыть 0 заменить на 1
+                }
+                if (newBonuses[2].id === playerPositionId) {
+                   if (newEffect === 'slowdown') {
+                       newEffect = 'new slowdown'
+                   } else {
+                       newEffect = 'slowdown'
+                   } 
+                    newBonuses[2].id = null //не забыть 0 заменить на 2
+                }
+                return newEffect
             }
 
-            isAlivePlayer()
+            newEffect = whetherEffectTaken()
 
             return {
                 ...state,
-                gameStatus: newGameStatus
+                gameStatus: newGameStatus,
+                effect: newEffect,
+                bonuses: newBonuses
             }
         }
-        case CHECK_BONUS: {
+        case CHECK_BONUS_LUCK: {
             let newBonusCounter = state.bonusCounter
             let newCurrentBonus = state.currentBonus
             if (state.bonusCounter === 10) {
                 const luck = getRandomNumber(0, 1)
-                if (luck === 1) {
-                    console.log('БОНУС')
+                if (luck === 1 || luck === 0) { //не забыть удалить второе условие
                     newCurrentBonus = bonuses[getRandomNumber(0, 2)]
                 } else {
                     console.log('ХУЙ ТЕБЕ')
@@ -614,21 +658,18 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_BONUS: {
-            
+
             let newBonuses = state.bonuses
             let randomNumber = getRandomNumber(1, 14)
             let bonusArea = state.bonusArea
             if (action.effect === 'slowdown') {
                 newBonuses[0].id = bonusArea[randomNumber]
-                console.log(newBonuses[0].id)
             }
             if (action.effect === 'strength') {
                 newBonuses[1].id = bonusArea[randomNumber]
-                console.log(newBonuses[1].id)
             }
             if (action.effect === 'wideAisle') {
                 newBonuses[2].id = bonusArea[randomNumber]
-                console.log(newBonuses[2].id)
             }
             return {
                 ...state,
@@ -639,6 +680,23 @@ export const gameReducer = (state = startState, action) => {
         case RESET_SETTINGS: {
             return {
                 ...state,
+                bonusArea: [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211],
+                bonuses: [{
+                        id: null,
+                        effect: 'slowdown',
+                    },
+                    {
+                        id: null,
+                        effect: 'strength'
+                    },
+                    {
+                        id: null,
+                        effect: 'wideAisle'
+                    }
+                ],
+                bonusCounter: 0,
+                currentBonus: null,
+
                 playerPositionId: 120,
                 score: 0,
 
@@ -655,8 +713,6 @@ export const gameReducer = (state = startState, action) => {
                 thirdLineStatus: false,
                 currentThirdLine: 0,
                 thirdEmptyElementId: 106,
-
-                bonusCounter: 0
             }
         }
         case MOVE_LINE: {
@@ -817,28 +873,55 @@ export const gameReducer = (state = startState, action) => {
         }
         case MOVE_BONUSES: {
             let newBonuses = state.bonuses;
-            for (let i = 0; i < newBonuses.length; i++){
+            for (let i = 0; i < newBonuses.length; i++) {
                 if (newBonuses[i].id !== null) {
                     newBonuses[i].id++
                 }
             }
-                return {
-                    ...state,
-                    bonuses: newBonuses
-                }
+            return {
+                ...state,
+                bonuses: newBonuses
+            }
         }
-            case REMOVE_WASTE_BONUS: {
-                let newBonuses = state.bonuses;
-                for (let i = 0; i < newBonuses.length; i++) {
-                    if (bottomEdgeElements.includes(newBonuses[i].id)) {
-                        newBonuses[i].id = null
-                    }
-                }
-                return {
-                    ...state,
-                    bonuses: newBonuses
+        case REMOVE_WASTE_BONUS: {
+            let newBonuses = state.bonuses;
+            for (let i = 0; i < newBonuses.length; i++) {
+                if (topEdgeElements.includes(newBonuses[i].id)) {
+                    newBonuses[i].id = null
                 }
             }
+            return {
+                ...state,
+                bonuses: newBonuses
+            }
+        }
+        case SET_SLOWDOWN_EFFECT: {
+            let newSlowdownEffectSeconds = 30
+            return {
+                ...state,
+                interval: 700,
+                slowdownEffectSeconds: newSlowdownEffectSeconds
+            }
+        }
+        case REDUCE_TIME_SLOWDOWN_EFFECT: {
+            let newSlowdownEffectSeconds = state.slowdownEffectSeconds
+            let newEffect = state.effect
+            let newInterval = state.interval
+            if (state.effect !== null) {
+                newSlowdownEffectSeconds--
+            }
+            if (newSlowdownEffectSeconds === -1) {
+                newSlowdownEffectSeconds = null
+                newEffect = null
+                newInterval = 350
+            }
+            return {
+                ...state,
+                slowdownEffectSeconds: newSlowdownEffectSeconds,
+                effect: newEffect,
+                interval: newInterval
+            }
+        }
         default:
             return state;
     }
@@ -866,8 +949,8 @@ export const setCurrentLine = (currentLine) => ({
 })
 
 
-export const checkPlayerLocation = () => ({
-    type: CHECK_PLAYER_LOCATION,
+export const makePlayerInteraction = () => ({
+    type: MAKE_PLAYER_INTERACTION,
 })
 
 export const resetSettings = () => ({
@@ -875,8 +958,8 @@ export const resetSettings = () => ({
 })
 
 
-export const checkBonus = () => ({
-    type: CHECK_BONUS
+export const checkBonusLuck = () => ({
+    type: CHECK_BONUS_LUCK
 })
 
 
@@ -892,4 +975,12 @@ export const moveBonus = () => ({
 
 export const removeWasteBonus = () => ({
     type: REMOVE_WASTE_BONUS
+})
+
+export const setSlowdownEffect = () => ({
+    type: SET_SLOWDOWN_EFFECT
+})
+
+export const reduceTimeSlowdownEffect = () => ({
+    type: REDUCE_TIME_SLOWDOWN_EFFECT
 })

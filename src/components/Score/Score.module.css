@@ -1,5 +1,21 @@
+.panel{
+    margin-left: 20px;
+}
 
 .gameScore {
     font-family: "gameFont";
     font-size: 60px;
+    
+}
+
+.slowdownEffectSeconds{
+    background-image: url(../../../public/bonuses/slowdown.png);
+  font-family: "gameFont";
+  font-size: 60px;
+  width: 60px;
+  height: 60px;
+}
+
+.slowdownEffectSecondsText{
+    margin-left: 80px;
 }

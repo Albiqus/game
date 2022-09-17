@@ -12,6 +12,43 @@
     background-color: pink;
 }
 
+.line {
+    background-image: url(../../../public/line-block.png);
+}
+
+.slowdownLine {
+   background-image: url(../../../public/line-block-slowdown.png);
+}
+
+
+
+.slowdownEffect {
+     background-image: url(../../../public/bonuses/slowdown.png);
+}
+
+.slowdownSlowdownEffect {
+     background-image: url(../../../public/bonuses/slowdown-slowdown.png.png);
+}
+
+
+.strengthEffect{
+    background-image: url(../../../public/bonuses/strength.png);
+}
+
+.slowdownStrengthEffect {
+    background-image: url(../../../public/bonuses/strength-slowdown.png);
+}
+
+.wideAisleEffect {
+    background-image: url(../../../public/bonuses/wideAisle.png);
+}
+
+.slowdownWideAisleEffect {
+    background-image: url(../../../public/bonuses/wideAisle-slowdown.png);
+}
+
+
+
 .characterRed {
     background-image: url(../../../public/characters/character-red-60x60.png);
 }
@@ -24,18 +61,18 @@
     background-image: url(../../../public/characters/character-blue-60x60.png);
 }
 
-.line {
-    background-image: url(../../../public/line-block.png);
+.slowdown{
+    background-color: rgb(0, 183, 255);
 }
 
-.slowdownEffect {
-     background-image: url(../../../public/bonuses/slowdown.png);
+.characterRedSlowdown{
+    background-image: url(../../../public/characters/character-red-slowdown60x60.png);
 }
 
-.strengthEffect{
-    background-image: url(../../../public/bonuses/strength.png);
+.characterGreenSlowdown {
+    background-image: url(../../../public/characters/character-green-slowdown60x60.png)
 }
 
-.wideAisleEffect {
-    background-image: url(../../../public/bonuses/wideAisle.png);
+.characterBlueSlowdown{
+     background-image: url(../../../public/characters/character-blue-slowdown60x60.png)
 }

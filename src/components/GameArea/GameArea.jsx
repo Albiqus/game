@@ -3,9 +3,9 @@
 import { connect } from "react-redux"
 import classes from './GameArea.module.css';
 import React, { useCallback, useEffect, useState } from "react";
-import { checkBonus, checkPlayerLocation, moveBonus, moveLine, resetSettings, setCurrentLine, setBonus, setPosition, removeWasteBonus} from "../../store/game-reducer";
+import { checkBonusLuck, makePlayerInteraction, moveBonus, moveLine, resetSettings, setCurrentLine, setBonus, setPosition, removeWasteBonus, setSlowdownEffect, reduceTimeSlowdownEffect} from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
-import { gameMusics } from "../../data/data";
+import { intervals, gameMusics } from "../../data/data";
 import { getRandomNumber } from "../../utils/getRandomNumber";
 
 
@@ -15,26 +15,26 @@ const GameArea = (props) => {
     
     let [intervalIdToReset, setIntervalIdToReset] = useState(null)
 
-    const myCallback = useCallback(() => {
+    const move = useCallback(() => {
         props.moveLine()
         props.setCurrentLine()
         props.moveBonus()
         props.removeWasteBonus()
-        props.checkPlayerLocation()
-        props.checkBonus()
+        props.makePlayerInteraction()
+        props.checkBonusLuck()
     }, [props])
 
 
 
     // вызывается колбэк (первый аргумент из useEffect) при монтировании (так как пустой массив зависимостей)
     useEffect(() => {
-        const intervalId = setInterval(myCallback, 350);
+        const intervalId = setInterval(move, props.interval);
         setIntervalIdToReset(intervalId)
         // эта функция вызывается при componentUnMount
         return () => {
             clearInterval(intervalId)
         }
-    }, [props.gameStatus]);
+    }, [props.gameStatus, props.interval]);
 
 
     useEffect(() => {
@@ -53,39 +53,79 @@ const GameArea = (props) => {
         <div key={row[0].id}>
             {row.map(element => {
                 let className = classes.element;
+                if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                    className += ` ${classes.slowdown}`
+                }
                 if (props.playerPositionId === element.id) {
                     switch (props.characterSelected) {
                         case 'red':
-                            className += ` ${classes.characterRed}`
+                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                                className += ` ${classes.characterRedSlowdown}`
+                            } else {
+                                className += ` ${classes.characterRed}`
+                            }
                             break
                         case 'green':
-                            className += ` ${classes.characterGreen}`
+                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                                className += ` ${classes.characterGreenSlowdown}`
+                            } else {
+                                className += ` ${classes.characterGreen}`
+                            }
                             break
                         case 'blue':
-                            className += ` ${classes.characterBlue}`
+                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                                className += ` ${classes.characterBlueSlowdown}`
+                            } else {
+                                className += ` ${classes.characterBlue}`
+                            }
                             break
                         default:
                     }
                     className += ` ${classes.player}`
                 }
                 if (props.lineIds.includes(element.id)) {
-                    className += ` ${classes.line}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownLine}`
+                    } else {
+                        className += ` ${classes.line}`
+                    }
                 }
                 if (props.secondLineIds.includes(element.id) && props.secondLineStatus) {
-                    className += ` ${classes.line}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownLine}`
+                    } else {
+                        className += ` ${classes.line}`
+                    }
                 }
                 if (props.thirdLineIds.includes(element.id) && props.thirdLineStatus) {
-                    className += ` ${classes.line}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownLine}`
+                    } else {
+                        className += ` ${classes.line}`
+                    }
                 }
                 
                 if (props.bonuses[0].id === element.id) {
-                    className += ` ${classes.slowdownEffect}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownSlowdownEffect}`
+                    } else {
+                        className += ` ${classes.slowdownEffect}`
+                    }
                 }
                 if (props.bonuses[1].id === element.id) {
-                    className += ` ${classes.strengthEffect}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownStrengthEffect}`
+                    } else {
+                        className += ` ${classes.strengthEffect}`
+                    }
                 }
                 if (props.bonuses[2].id === element.id) {
-                    className += ` ${classes.wideAisleEffect}`
+                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                        className += ` ${classes.slowdownWideAisleEffect}`
+                    } else {
+                        className += ` ${classes.wideAisleEffect}`
+                    }
+                    
                 }
 
                 return <div className={className} key={element.id}></div>
@@ -96,7 +136,7 @@ const GameArea = (props) => {
 
         if (DIRECTIONS.includes(e.key)) {
             props.setPosition(e.key)
-            props.checkPlayerLocation()
+            props.makePlayerInteraction()
         }
     }
 
@@ -119,8 +159,11 @@ const GameArea = (props) => {
         setRandomNumber(getRandomNumber(0, 9))
     }, [props.gameStatus])
 
-    useEffect(() => {
-        switch (props.currentBonus) {
+
+
+
+    const setBonus = () => {
+            switch (props.currentBonus) {
             case 'slowdown':
                 props.setBonus('slowdown')
                 break
@@ -132,9 +175,48 @@ const GameArea = (props) => {
                 break
             default:
         }
-    }, [props.currentBonus])
-
+    }
     
+    useEffect(() => {
+        let factor = 1
+        if (props.effect === 'slowdown') {
+            factor++
+        }
+        setTimeout(setBonus, factor * intervals[getRandomNumber(0, 3)])
+    }, [props.currentBonus])
+    
+    
+
+    useEffect(() => {
+        switch (props.effect) {
+            case 'slowdown':
+            case 'new slowdown':
+                props.setSlowdownEffect()
+                break
+            case 'strength':
+                props.setBonus('strength')
+                break
+            case 'wideAisle':
+                props.setBonus('wideAisle')
+                break
+            default:
+        }
+    }, [props.effect])
+
+
+
+
+    useEffect(() => {
+        const intervalId = setTimeout(() => {
+            props.reduceTimeSlowdownEffect()
+        }, 1000);
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [props.slowdownEffectSeconds])
+
+
+
     if (props.gameStatus) {
         return (
             <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
@@ -163,7 +245,11 @@ const mapStateToProps = (state) => {
         musicVolume: state.menu.musicVolume,
         currentBonus: state.data.currentBonus,
         bonusArea: state.data.bonusArea,
-        bonuses: state.data.bonuses
+        bonuses: state.data.bonuses,
+        effect: state.data.effect,
+        interval: state.data.interval,
+
+        slowdownEffectSeconds: state.data.slowdownEffectSeconds
     }
 }
 
@@ -171,13 +257,15 @@ const GameAreaContainer = connect(mapStateToProps,
     {   setPosition,
         moveLine,
         setCurrentLine,
-        checkPlayerLocation,
+        makePlayerInteraction,
         setDeathModalStatus,
         resetSettings,
-        checkBonus,
+        checkBonusLuck,
         setBonus,
         moveBonus,
-        removeWasteBonus
+        removeWasteBonus,
+        setSlowdownEffect,
+        reduceTimeSlowdownEffect
     })(GameArea)
 
 export { GameAreaContainer }
