@@ -9,7 +9,7 @@
 }
 
 .slowdownEffectSeconds{
-    background-image: url(../../../public/bonuses/slowdown.png);
+  background-image: url(../../../public/bonuses/slowdown.png);
   font-family: "gameFont";
   font-size: 60px;
   width: 60px;
@@ -17,5 +17,17 @@
 }
 
 .slowdownEffectSecondsText{
+    margin-left: 80px;
+}
+
+.strengthEffectSeconds{
+  background-image: url(../../../public/bonuses/strength.png);
+  font-family: "gameFont";
+  font-size: 60px;
+  width: 60px;
+  height: 60px;
+}
+
+.strengthEffectSecondsText {
     margin-left: 80px;
 }

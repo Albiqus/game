@@ -20,6 +20,8 @@ const REMOVE_WASTE_BONUS = 'REMOVE_WASTE_BONUS'
 
 const SET_SLOWDOWN_EFFECT = 'SET_SLOWDOWN_EFFECT'
 const REDUCE_TIME_SLOWDOWN_EFFECT = 'REDUCE_TIME_SLOWDOWN_EFFECT'
+const SET_STRENGTH_EFFECT = 'SET_STRENGTH_EFFECT'
+const REDUCE_TIME_STRENGTH_EFFECT = 'REDUCE_TIME_STRENGTH_EFFECT'
 
 const startState = {
     gameStatus: false,
@@ -508,9 +510,13 @@ const startState = {
     bonusCounter: 0,
     currentBonus: null,
 
-    effect: null,
+    slowdownStatus: null,
     slowdownEffectSeconds: null,
+
+    strengthStatus: null,
     strengthEffectSeconds: null,
+
+    wideAisleStatus: null,
     wideAisleEffectSeconds: null,
 
     playerPositionId: 120,
@@ -585,58 +591,81 @@ export const gameReducer = (state = startState, action) => {
         case MAKE_PLAYER_INTERACTION: {
 
             let newGameStatus;
+            let firstLineIds = state.lineIds
+            let secondLineIds = state.secondLineIds
+            let thirdLineIds = state.thirdLineIds
+            let playerPositionId = state.playerPositionId
+
             const isAlivePlayer = () => {
-                const firstLineIds = state.lineIds
-                const secondLineIds = state.secondLineIds
-                const thirdLineIds = state.thirdLineIds
-                const playerPositionId = state.playerPositionId
                 if (firstLineIds.includes(playerPositionId) || secondLineIds.includes(playerPositionId) || thirdLineIds.includes(playerPositionId)) {
-                    newGameStatus = true // вернуть false
+                    if (state.strengthStatus === 'strength' || state.strengthStatus === 'new strength') {
+                        newGameStatus = true
+                        if (firstLineIds.includes(playerPositionId)) {
+                            firstLineIds[firstLineIds.indexOf(playerPositionId)] = 1000;
+                        }
+                        if (secondLineIds.includes(playerPositionId)) {
+                            secondLineIds[secondLineIds.indexOf(playerPositionId)] = 1000;
+                        }
+                        if (thirdLineIds.includes(playerPositionId)) {
+                            thirdLineIds[thirdLineIds.indexOf(playerPositionId)] = 1000;
+                        }
+                    } else {
+                        newGameStatus = false // вернуть false
+                    }
+
                 } else {
                     newGameStatus = true
                 }
             }
             isAlivePlayer()
 
-            let newEffect = state.effect
+            let newSlowdownStatus = state.slowdownStatus
+            let newStrengthStatus = state.strengthStatus
+            let newWideAisleStatus = state.wideAisleStatus
             let newBonuses = state.bonuses
 
             const whetherEffectTaken = () => {
                 const playerPositionId = state.playerPositionId
                 if (newBonuses[0].id === playerPositionId) {
-                    if (newEffect === 'slowdown') {
-                        newEffect = 'new slowdown'
+                    if (newSlowdownStatus === 'slowdown') {
+                        newSlowdownStatus = 'new slowdown'
                     } else {
-                        newEffect = 'slowdown'
+                        newSlowdownStatus = 'slowdown'
                     }
                     newBonuses[0].id = null
                 }
                 if (newBonuses[1].id === playerPositionId) {
-                    if (newEffect === 'slowdown') {
-                        newEffect = 'new slowdown'
+                    if (newStrengthStatus === 'strength') {
+                        newStrengthStatus = 'new strength'
                     } else {
-                        newEffect = 'slowdown'
+                        newStrengthStatus = 'strength'
                     }
-                    newBonuses[1].id = null //не забыть 0 заменить на 1
+                    newBonuses[1].id = null
                 }
                 if (newBonuses[2].id === playerPositionId) {
-                   if (newEffect === 'slowdown') {
-                       newEffect = 'new slowdown'
-                   } else {
-                       newEffect = 'slowdown'
-                   } 
-                    newBonuses[2].id = null //не забыть 0 заменить на 2
+                    if (newWideAisleStatus === 'wideAisle') {
+                        newWideAisleStatus = 'new wideAisle'
+                    } else {
+                        newWideAisleStatus = 'wideAisle'
+                    }
+                    newBonuses[2].id = null
                 }
-                return newEffect
+                return newSlowdownStatus
             }
 
-            newEffect = whetherEffectTaken()
+            newSlowdownStatus = whetherEffectTaken()
 
             return {
                 ...state,
                 gameStatus: newGameStatus,
-                effect: newEffect,
-                bonuses: newBonuses
+                slowdownStatus: newSlowdownStatus,
+                strengthStatus: newStrengthStatus,
+                wideAisleStatus: newWideAisleStatus,
+                bonuses: newBonuses,
+
+                lineIds: firstLineIds,
+                secondLineIds: secondLineIds,
+                thirdLineIds: thirdLineIds
             }
         }
         case CHECK_BONUS_LUCK: {
@@ -697,6 +726,15 @@ export const gameReducer = (state = startState, action) => {
                 bonusCounter: 0,
                 currentBonus: null,
 
+                slowdownStatus: null,
+                slowdownEffectSeconds: null,
+
+                strengthStatus: null,
+                strengthEffectSeconds: null,
+
+                wideAisleStatus: null,
+                wideAisleEffectSeconds: null,
+
                 playerPositionId: 120,
                 score: 0,
 
@@ -713,6 +751,8 @@ export const gameReducer = (state = startState, action) => {
                 thirdLineStatus: false,
                 currentThirdLine: 0,
                 thirdEmptyElementId: 106,
+
+                interval: 350
             }
         }
         case MOVE_LINE: {
@@ -733,6 +773,7 @@ export const gameReducer = (state = startState, action) => {
                 }
                 if (state.currentLine === 15) {
                     let randomNumber = getRandomNumber(1, 14)
+                    newLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newEmptyElementId = newLineIds[randomNumber]
                     newLineIds[randomNumber] = 1000
                 }
@@ -757,6 +798,7 @@ export const gameReducer = (state = startState, action) => {
                 }
                 if (state.currentSecondLine === 15) {
                     let randomNumber = getRandomNumber(1, 14)
+                    newSecondLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newSecondEmptyElementId = newSecondLineIds[randomNumber]
                     newSecondLineIds[randomNumber] = 1000
                 }
@@ -782,6 +824,7 @@ export const gameReducer = (state = startState, action) => {
                 }
                 if (state.currentThirdLine === 15) {
                     let randomNumber = getRandomNumber(1, 14)
+                    newThirdLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newThirdEmptyElementId = newThirdLineIds[randomNumber]
                     newThirdLineIds[randomNumber] = 1000
                 }
@@ -905,21 +948,45 @@ export const gameReducer = (state = startState, action) => {
         }
         case REDUCE_TIME_SLOWDOWN_EFFECT: {
             let newSlowdownEffectSeconds = state.slowdownEffectSeconds
-            let newEffect = state.effect
+            let newSlowdownStatus = state.slowdownStatus
             let newInterval = state.interval
-            if (state.effect !== null) {
+            if (state.slowdownStatus !== null) {
                 newSlowdownEffectSeconds--
             }
             if (newSlowdownEffectSeconds === -1) {
                 newSlowdownEffectSeconds = null
-                newEffect = null
+                newSlowdownStatus = null
                 newInterval = 350
             }
             return {
                 ...state,
                 slowdownEffectSeconds: newSlowdownEffectSeconds,
-                effect: newEffect,
+                slowdownStatus: newSlowdownStatus,
                 interval: newInterval
+            }
+        }
+        case SET_STRENGTH_EFFECT: {
+            let newStrengthEffectSeconds = 12
+            return {
+                ...state,
+                strengthEffectSeconds: newStrengthEffectSeconds
+            }
+        }
+        case REDUCE_TIME_STRENGTH_EFFECT: {
+            let newStrengthEffectSeconds = state.strengthEffectSeconds
+            let newStrengthStatus = state.strengthStatus
+
+            if (state.strengthStatus !== null) {
+                newStrengthEffectSeconds--
+            }
+            if (newStrengthEffectSeconds === -1) {
+                newStrengthEffectSeconds = null
+                newStrengthStatus = null
+            }
+            return {
+                ...state,
+                strengthEffectSeconds: newStrengthEffectSeconds,
+                strengthStatus: newStrengthStatus,
             }
         }
         default:
@@ -983,4 +1050,13 @@ export const setSlowdownEffect = () => ({
 
 export const reduceTimeSlowdownEffect = () => ({
     type: REDUCE_TIME_SLOWDOWN_EFFECT
+})
+
+export const setStrengthEffect = () => ({
+    type: SET_STRENGTH_EFFECT
+})
+
+
+export const reduceTimeStrengthEffect = () => ({
+    type: REDUCE_TIME_STRENGTH_EFFECT
 })

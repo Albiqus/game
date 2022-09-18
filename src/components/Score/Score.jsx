@@ -13,6 +13,11 @@ const Score = (props) => {
                         <p className={classes.slowdownEffectSecondsText}>{props.slowdownEffectSeconds}</p>
                     </div>
                 }
+                {props.strengthEffectSeconds !== null &&
+                    <div className={classes.strengthEffectSeconds}>
+                        <p className={classes.strengthEffectSecondsText}>{props.strengthEffectSeconds}</p>
+                    </div>
+                }
             </div>
         )
     }
@@ -27,6 +32,7 @@ const mapStateToProps = (state) => {
         menuModalStatus: state.menu.modalStatus,
         gameStatus: state.data.gameStatus,
         slowdownEffectSeconds: state.data.slowdownEffectSeconds,
+        strengthEffectSeconds: state.data.strengthEffectSeconds
     }
 }
 

@@ -3,7 +3,20 @@
 import { connect } from "react-redux"
 import classes from './GameArea.module.css';
 import React, { useCallback, useEffect, useState } from "react";
-import { checkBonusLuck, makePlayerInteraction, moveBonus, moveLine, resetSettings, setCurrentLine, setBonus, setPosition, removeWasteBonus, setSlowdownEffect, reduceTimeSlowdownEffect} from "../../store/game-reducer";
+import {
+    checkBonusLuck,
+    makePlayerInteraction,
+    moveBonus, moveLine,
+    resetSettings,
+    setCurrentLine,
+    setBonus,
+    setPosition,
+    removeWasteBonus,
+    setSlowdownEffect,
+    reduceTimeSlowdownEffect,
+    setStrengthEffect,
+    reduceTimeStrengthEffect
+} from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
 import { intervals, gameMusics } from "../../data/data";
 import { getRandomNumber } from "../../utils/getRandomNumber";
@@ -53,81 +66,44 @@ const GameArea = (props) => {
         <div key={row[0].id}>
             {row.map(element => {
                 let className = classes.element;
-                if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
+                if (props.slowdownStatus === 'slowdown' || props.slowdownStatus === 'new slowdown') {
                     className += ` ${classes.slowdown}`
                 }
                 if (props.playerPositionId === element.id) {
                     switch (props.characterSelected) {
                         case 'red':
-                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                                className += ` ${classes.characterRedSlowdown}`
-                            } else {
                                 className += ` ${classes.characterRed}`
-                            }
                             break
                         case 'green':
-                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                                className += ` ${classes.characterGreenSlowdown}`
-                            } else {
                                 className += ` ${classes.characterGreen}`
-                            }
                             break
                         case 'blue':
-                            if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                                className += ` ${classes.characterBlueSlowdown}`
-                            } else {
                                 className += ` ${classes.characterBlue}`
-                            }
                             break
                         default:
                     }
                     className += ` ${classes.player}`
                 }
                 if (props.lineIds.includes(element.id)) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownLine}`
-                    } else {
                         className += ` ${classes.line}`
-                    }
                 }
                 if (props.secondLineIds.includes(element.id) && props.secondLineStatus) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownLine}`
-                    } else {
                         className += ` ${classes.line}`
-                    }
                 }
                 if (props.thirdLineIds.includes(element.id) && props.thirdLineStatus) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownLine}`
-                    } else {
                         className += ` ${classes.line}`
-                    }
                 }
                 
                 if (props.bonuses[0].id === element.id) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownSlowdownEffect}`
-                    } else {
                         className += ` ${classes.slowdownEffect}`
-                    }
                 }
                 if (props.bonuses[1].id === element.id) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownStrengthEffect}`
-                    } else {
                         className += ` ${classes.strengthEffect}`
-                    }
                 }
                 if (props.bonuses[2].id === element.id) {
-                    if (props.effect === 'slowdown' || props.effect === 'new slowdown') {
-                        className += ` ${classes.slowdownWideAisleEffect}`
-                    } else {
                         className += ` ${classes.wideAisleEffect}`
-                    }
                     
                 }
-
                 return <div className={className} key={element.id}></div>
             })}
         </div>
@@ -179,31 +155,32 @@ const GameArea = (props) => {
     
     useEffect(() => {
         let factor = 1
-        if (props.effect === 'slowdown') {
+        let interval = intervals[getRandomNumber(0, 3)]
+        if (props.slowdownStatus === 'slowdown' || props.slowdownStatus === 'new slowdown') {
             factor++
         }
-        setTimeout(setBonus, factor * intervals[getRandomNumber(0, 3)])
+        setTimeout(setBonus, factor * interval)
     }, [props.currentBonus])
     
-    
+
 
     useEffect(() => {
-        switch (props.effect) {
-            case 'slowdown':
-            case 'new slowdown':
-                props.setSlowdownEffect()
-                break
-            case 'strength':
-                props.setBonus('strength')
-                break
-            case 'wideAisle':
-                props.setBonus('wideAisle')
-                break
-            default:
+        if (props.slowdownStatus === 'slowdown' || props.slowdownStatus === 'new slowdown') {
+            props.setSlowdownEffect()
         }
-    }, [props.effect])
+    }, [props.slowdownStatus])
 
+    useEffect(() => {
+        if (props.strengthStatus === 'strength' || props.strengthStatus === 'new strength') {
+            props.setStrengthEffect()
+        }
+    }, [props.strengthStatus])
 
+    useEffect(() => {
+        if (props.wideAisleStatus === 'wideAisle' || props.wideAisleStatus === 'new wideAisle') {
+            console.log('хочу поставить эффект расширения')
+        }
+    }, [props.wideAisleStatus])
 
 
     useEffect(() => {
@@ -215,7 +192,14 @@ const GameArea = (props) => {
         }
     }, [props.slowdownEffectSeconds])
 
-
+    useEffect(() => {
+        const intervalId = setTimeout(() => {
+            props.reduceTimeStrengthEffect()
+        }, 1000);
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [props.strengthEffectSeconds])
 
     if (props.gameStatus) {
         return (
@@ -246,10 +230,12 @@ const mapStateToProps = (state) => {
         currentBonus: state.data.currentBonus,
         bonusArea: state.data.bonusArea,
         bonuses: state.data.bonuses,
-        effect: state.data.effect,
+        slowdownStatus: state.data.slowdownStatus,
+        strengthStatus: state.data.strengthStatus,
+        wideAisleStatus: state.data.wideAisleStatus,
         interval: state.data.interval,
-
-        slowdownEffectSeconds: state.data.slowdownEffectSeconds
+        slowdownEffectSeconds: state.data.slowdownEffectSeconds,
+        strengthEffectSeconds: state.data.strengthEffectSeconds
     }
 }
 
@@ -265,7 +251,9 @@ const GameAreaContainer = connect(mapStateToProps,
         moveBonus,
         removeWasteBonus,
         setSlowdownEffect,
-        reduceTimeSlowdownEffect
+        reduceTimeSlowdownEffect,
+        setStrengthEffect,
+        reduceTimeStrengthEffect
     })(GameArea)
 
 export { GameAreaContainer }
