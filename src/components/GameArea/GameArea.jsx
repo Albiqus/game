@@ -15,17 +15,19 @@ import {
     setSlowdownEffect,
     reduceTimeSlowdownEffect,
     setStrengthEffect,
-    reduceTimeStrengthEffect
+    reduceTimeStrengthEffect,
+    setWideAisleEffect,
+    reduceTimeWideAisleEffect
 } from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
-import { intervals, gameMusics } from "../../data/data";
+import { intervals, gameMusics, slowdown, strength, wideAisle } from "../../data/data";
 import { getRandomNumber } from "../../utils/getRandomNumber";
 
 
 const DIRECTIONS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'd', 's', 'a']
 
 const GameArea = (props) => {
-    
+
     let [intervalIdToReset, setIntervalIdToReset] = useState(null)
 
     const move = useCallback(() => {
@@ -72,37 +74,37 @@ const GameArea = (props) => {
                 if (props.playerPositionId === element.id) {
                     switch (props.characterSelected) {
                         case 'red':
-                                className += ` ${classes.characterRed}`
+                            className += ` ${classes.characterRed}`
                             break
                         case 'green':
-                                className += ` ${classes.characterGreen}`
+                            className += ` ${classes.characterGreen}`
                             break
                         case 'blue':
-                                className += ` ${classes.characterBlue}`
+                            className += ` ${classes.characterBlue}`
                             break
                         default:
                     }
                     className += ` ${classes.player}`
                 }
                 if (props.lineIds.includes(element.id)) {
-                        className += ` ${classes.line}`
+                    className += ` ${classes.line}`
                 }
                 if (props.secondLineIds.includes(element.id) && props.secondLineStatus) {
-                        className += ` ${classes.line}`
+                    className += ` ${classes.line}`
                 }
                 if (props.thirdLineIds.includes(element.id) && props.thirdLineStatus) {
-                        className += ` ${classes.line}`
+                    className += ` ${classes.line}`
                 }
-                
+
                 if (props.bonuses[0].id === element.id) {
-                        className += ` ${classes.slowdownEffect}`
+                    className += ` ${classes.slowdownEffect}`
                 }
                 if (props.bonuses[1].id === element.id) {
-                        className += ` ${classes.strengthEffect}`
+                    className += ` ${classes.strengthEffect}`
                 }
                 if (props.bonuses[2].id === element.id) {
-                        className += ` ${classes.wideAisleEffect}`
-                    
+                    className += ` ${classes.wideAisleEffect}`
+
                 }
                 return <div className={className} key={element.id}></div>
             })}
@@ -139,7 +141,7 @@ const GameArea = (props) => {
 
 
     const setBonus = () => {
-            switch (props.currentBonus) {
+        switch (props.newBonus) {
             case 'slowdown':
                 props.setBonus('slowdown')
                 break
@@ -152,16 +154,16 @@ const GameArea = (props) => {
             default:
         }
     }
-    
+
     useEffect(() => {
         let factor = 1
         let interval = intervals[getRandomNumber(0, 3)]
         if (props.slowdownStatus === 'slowdown' || props.slowdownStatus === 'new slowdown') {
-            factor++
+            factor = 1.3
         }
         setTimeout(setBonus, factor * interval)
-    }, [props.currentBonus])
-    
+    }, [props.newBonus])
+
 
 
     useEffect(() => {
@@ -178,7 +180,7 @@ const GameArea = (props) => {
 
     useEffect(() => {
         if (props.wideAisleStatus === 'wideAisle' || props.wideAisleStatus === 'new wideAisle') {
-            console.log('хочу поставить эффект расширения')
+            props.setWideAisleEffect()
         }
     }, [props.wideAisleStatus])
 
@@ -201,11 +203,29 @@ const GameArea = (props) => {
         }
     }, [props.strengthEffectSeconds])
 
+    useEffect(() => {
+        const intervalId = setTimeout(() => {
+            props.reduceTimeWideAisleEffect()
+        }, 1000);
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [props.wideAisleEffectSeconds])
+
     if (props.gameStatus) {
         return (
             <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
                 {gameAreaElements}
                 <audio ref={audio} src={gameMusics[randomNumber]} autoPlay loop muted={false} hidden></audio>
+                {props.slowdownStatus !== null &&
+                    <audio src={slowdown} autoPlay muted={false} hidden></audio>
+                }
+                {props.strengthStatus !== null &&
+                    <audio src={strength} autoPlay muted={false} hidden></audio>
+                }
+                {props.wideAisleStatus !== null &&
+                    <audio src={wideAisle} autoPlay muted={false} hidden></audio>
+                }
             </div>
         )
     }
@@ -227,7 +247,7 @@ const mapStateToProps = (state) => {
         characterSelected: state.menu.characterSelected,
         gameStatus: state.data.gameStatus,
         musicVolume: state.menu.musicVolume,
-        currentBonus: state.data.currentBonus,
+        newBonus: state.data.newBonus,
         bonusArea: state.data.bonusArea,
         bonuses: state.data.bonuses,
         slowdownStatus: state.data.slowdownStatus,
@@ -235,12 +255,14 @@ const mapStateToProps = (state) => {
         wideAisleStatus: state.data.wideAisleStatus,
         interval: state.data.interval,
         slowdownEffectSeconds: state.data.slowdownEffectSeconds,
-        strengthEffectSeconds: state.data.strengthEffectSeconds
+        strengthEffectSeconds: state.data.strengthEffectSeconds,
+        wideAisleEffectSeconds: state.data.wideAisleEffectSeconds
     }
 }
 
 const GameAreaContainer = connect(mapStateToProps,
-    {   setPosition,
+    {
+        setPosition,
         moveLine,
         setCurrentLine,
         makePlayerInteraction,
@@ -253,7 +275,9 @@ const GameAreaContainer = connect(mapStateToProps,
         setSlowdownEffect,
         reduceTimeSlowdownEffect,
         setStrengthEffect,
-        reduceTimeStrengthEffect
+        reduceTimeStrengthEffect,
+        setWideAisleEffect,
+        reduceTimeWideAisleEffect
     })(GameArea)
 
 export { GameAreaContainer }

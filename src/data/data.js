@@ -9,6 +9,9 @@ import track8 from '../music/gameMusic/track8.mp3'
 import track9 from '../music/gameMusic/track9.mp3'
 import track10 from '../music/gameMusic/track10.mp3'
 
+import slowdown from '../music/effects/slowdown.mp3'
+import strength from '../music/effects/strength.mp3'
+import wideAisle from '../music/effects/wide-aisle.mp3'
 
 const gameMusics = [track1, track2, track3, track4, track5, track6, track7, track8, track9, track10]
 
@@ -19,5 +22,8 @@ const intervals = [350, 700, 1050, 1400]
 export {
     gameMusics,
     bonuses,
-    intervals
+    intervals,
+    slowdown,
+    strength,
+    wideAisle,
 }

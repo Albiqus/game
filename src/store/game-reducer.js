@@ -22,6 +22,8 @@ const SET_SLOWDOWN_EFFECT = 'SET_SLOWDOWN_EFFECT'
 const REDUCE_TIME_SLOWDOWN_EFFECT = 'REDUCE_TIME_SLOWDOWN_EFFECT'
 const SET_STRENGTH_EFFECT = 'SET_STRENGTH_EFFECT'
 const REDUCE_TIME_STRENGTH_EFFECT = 'REDUCE_TIME_STRENGTH_EFFECT'
+const SET_WIDE_AISLE_EFFECT = 'SET_WIDE_AISLE_EFFECT'
+const REDUCE_TIME_WIDE_AISLE_EFFECT = 'REDUCE_TIME_WIDE_AISLE_EFFECT'
 
 const startState = {
     gameStatus: false,
@@ -507,8 +509,8 @@ const startState = {
             effect: 'wideAisle'
         }
     ],
-    bonusCounter: 0,
-    currentBonus: null,
+    bonusCounter: 9,
+    newBonus: null,
 
     slowdownStatus: null,
     slowdownEffectSeconds: null,
@@ -610,7 +612,7 @@ export const gameReducer = (state = startState, action) => {
                             thirdLineIds[thirdLineIds.indexOf(playerPositionId)] = 1000;
                         }
                     } else {
-                        newGameStatus = false // вернуть false
+                        newGameStatus = false
                     }
 
                 } else {
@@ -670,20 +672,22 @@ export const gameReducer = (state = startState, action) => {
         }
         case CHECK_BONUS_LUCK: {
             let newBonusCounter = state.bonusCounter
-            let newCurrentBonus = state.currentBonus
+            let newNewBonus = state.newBonus
             if (state.bonusCounter === 10) {
-                const luck = getRandomNumber(0, 1)
+                let luck = getRandomNumber(0, 1)
+                if (state.score < 10) {
+                    luck = 1
+                    console.log('стопудова заспавнится')
+                }
                 if (luck === 1 || luck === 0) { //не забыть удалить второе условие
-                    newCurrentBonus = bonuses[getRandomNumber(0, 2)]
-                } else {
-                    console.log('ХУЙ ТЕБЕ')
+                    newNewBonus = bonuses[getRandomNumber(0, 2)]
                 }
                 newBonusCounter = 0
             }
             return {
                 ...state,
                 bonusCounter: newBonusCounter,
-                currentBonus: newCurrentBonus
+                newBonus: newNewBonus
             }
         }
         case SET_BONUS: {
@@ -703,7 +707,7 @@ export const gameReducer = (state = startState, action) => {
             return {
                 ...state,
                 bonuses: newBonuses,
-                currentBonus: null
+                newBonus: null
             }
         }
         case RESET_SETTINGS: {
@@ -723,8 +727,8 @@ export const gameReducer = (state = startState, action) => {
                         effect: 'wideAisle'
                     }
                 ],
-                bonusCounter: 0,
-                currentBonus: null,
+                bonusCounter: 9,
+                newBonus: null,
 
                 slowdownStatus: null,
                 slowdownEffectSeconds: null,
@@ -762,10 +766,17 @@ export const gameReducer = (state = startState, action) => {
 
             const moveLine = () => {
                 for (let i = 0; i < newLineIds.length; i++) {
+                    
                     if (state.currentLine === 15) {
                         newLineIds[i] = newLineIds[i] - 14
                         if (newLineIds[i] === 1000) {
                             newLineIds[i] = state.emptyElementId
+                        }
+                        if (newLineIds[i] === 999) {
+                            newLineIds[i] = state.emptyElementId - 15
+                        }
+                        if (newLineIds[i] === 1001) {
+                            newLineIds[i] = state.emptyElementId + 15
                         }
                     } else {
                         newLineIds[i]++
@@ -776,6 +787,10 @@ export const gameReducer = (state = startState, action) => {
                     newLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newEmptyElementId = newLineIds[randomNumber]
                     newLineIds[randomNumber] = 1000
+                    if (state.wideAisleStatus === 'wideAisle' || state.wideAisleStatus === 'new wideAisle') {
+                        newLineIds[randomNumber - 1] = 999
+                        newLineIds[randomNumber + 1] = 1001
+                    }
                 }
                 if (typeof (newEmptyElementId) === 'undefined') {
                     newEmptyElementId = state.emptyElementId
@@ -792,6 +807,12 @@ export const gameReducer = (state = startState, action) => {
                         if (newSecondLineIds[i] === 1000) {
                             newSecondLineIds[i] = state.secondEmptyElementId
                         }
+                        if (newSecondLineIds[i] === 999) {
+                            newSecondLineIds[i] = state.secondEmptyElementId - 15
+                        }
+                        if (newSecondLineIds[i] === 1001) {
+                            newSecondLineIds[i] = state.secondEmptyElementId + 15
+                        }
                     } else {
                         newSecondLineIds[i]++
                     }
@@ -801,6 +822,10 @@ export const gameReducer = (state = startState, action) => {
                     newSecondLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newSecondEmptyElementId = newSecondLineIds[randomNumber]
                     newSecondLineIds[randomNumber] = 1000
+                     if (state.wideAisleStatus === 'wideAisle' || state.wideAisleStatus === 'new wideAisle') {
+                         newSecondLineIds[randomNumber - 1] = 999
+                         newSecondLineIds[randomNumber + 1] = 1001
+                     }
                 }
 
             }
@@ -818,6 +843,12 @@ export const gameReducer = (state = startState, action) => {
                         if (newThirdLineIds[i] === 1000) {
                             newThirdLineIds[i] = state.thirdEmptyElementId
                         }
+                           if (newThirdLineIds[i] === 999) {
+                            newThirdLineIds[i] = state.thirdEmptyElementId - 15
+                        }
+                        if (newThirdLineIds[i] === 1001) {
+                            newThirdLineIds[i] = state.thirdEmptyElementId + 15
+                        }
                     } else {
                         newThirdLineIds[i]++
                     }
@@ -827,6 +858,10 @@ export const gameReducer = (state = startState, action) => {
                     newThirdLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newThirdEmptyElementId = newThirdLineIds[randomNumber]
                     newThirdLineIds[randomNumber] = 1000
+                    if (state.wideAisleStatus === 'wideAisle' || state.wideAisleStatus === 'new wideAisle') {
+                        newThirdLineIds[randomNumber - 1] = 999
+                        newThirdLineIds[randomNumber + 1] = 1001
+                    }
                 }
 
             }
@@ -939,10 +974,10 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_SLOWDOWN_EFFECT: {
-            let newSlowdownEffectSeconds = 30
+            let newSlowdownEffectSeconds = 20
             return {
                 ...state,
-                interval: 700,
+                interval: 455,
                 slowdownEffectSeconds: newSlowdownEffectSeconds
             }
         }
@@ -966,7 +1001,7 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_STRENGTH_EFFECT: {
-            let newStrengthEffectSeconds = 12
+            let newStrengthEffectSeconds = 10
             return {
                 ...state,
                 strengthEffectSeconds: newStrengthEffectSeconds
@@ -987,6 +1022,59 @@ export const gameReducer = (state = startState, action) => {
                 ...state,
                 strengthEffectSeconds: newStrengthEffectSeconds,
                 strengthStatus: newStrengthStatus,
+            }
+        }
+        case SET_WIDE_AISLE_EFFECT: {
+            console.log(1)
+            let newWideAisleEffectSeconds = 25
+            let newLineIds = state.lineIds
+            let newSecondLineIds = state.secondLineIds
+            let newThirdLineIds = state.thirdLineIds
+
+            for (let i = 0; i < newLineIds.length; i++){
+                if (newLineIds[i] > 900) {
+                    newLineIds[i - 1] = 999
+                    newLineIds[i + 1] = 1001
+                    i++
+                }
+            }
+            for (let i = 0; i < newSecondLineIds.length; i++) {
+                if (newSecondLineIds[i] > 900) {
+                    newSecondLineIds[i - 1] = 999
+                    newSecondLineIds[i + 1] = 1001
+                    i++
+                }
+            }
+            for (let i = 0; i < newThirdLineIds.length; i++) {
+                if (newThirdLineIds[i] > 900) {
+                    newThirdLineIds[i - 1] = 999
+                    newThirdLineIds[i + 1] = 1001
+                    i++
+                }
+            }
+            return {
+                ...state,
+                wideAisleEffectSeconds: newWideAisleEffectSeconds,
+                lineIds: newLineIds,
+                secondLineIds: newSecondLineIds,
+                thirdLineIds: newThirdLineIds
+            }
+        }
+        case REDUCE_TIME_WIDE_AISLE_EFFECT: {
+            let newWideAisleEffectSeconds = state.wideAisleEffectSeconds
+            let newWideAisleStatus = state.wideAisleStatus
+
+            if (state.wideAisleStatus !== null) {
+                newWideAisleEffectSeconds--
+            }
+            if (newWideAisleEffectSeconds === -1) {
+                newWideAisleEffectSeconds = null
+                newWideAisleStatus = null
+            }
+            return {
+                ...state,
+                wideAisleEffectSeconds: newWideAisleEffectSeconds,
+                wideAisleStatus: newWideAisleStatus,
             }
         }
         default:
@@ -1035,7 +1123,6 @@ export const setBonus = (effect) => ({
     effect
 })
 
-
 export const moveBonus = () => ({
     type: MOVE_BONUSES
 })
@@ -1059,4 +1146,12 @@ export const setStrengthEffect = () => ({
 
 export const reduceTimeStrengthEffect = () => ({
     type: REDUCE_TIME_STRENGTH_EFFECT
+})
+
+export const setWideAisleEffect = () => ({
+    type: SET_WIDE_AISLE_EFFECT
+})
+
+export const reduceTimeWideAisleEffect = () => ({
+    type: REDUCE_TIME_WIDE_AISLE_EFFECT
 })
