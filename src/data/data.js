@@ -17,12 +17,9 @@ const gameMusics = [track1, track2, track3, track4, track5, track6, track7, trac
 
 const bonuses = ['slowdown', 'strength', 'wideAisle']
 
-const intervals = [350, 700, 1050, 1400]
-
 export {
     gameMusics,
     bonuses,
-    intervals,
     slowdown,
     strength,
     wideAisle,

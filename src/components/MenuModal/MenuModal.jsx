@@ -1,7 +1,7 @@
 
 import { connect } from "react-redux"
 import { resetSettings, setGameStatus } from "../../store/game-reducer";
-import { setCharacterSelected, setMenuModalStatus, setMusicVolume } from "../../store/menu-modal-reducer";
+import { setCharacterSelected, setEffectsVolume, setMenuModalStatus, setMusicVolume } from "../../store/menu-modal-reducer";
 import classes from './MenuModal.module.css';
 import sound from '../../music/menu.mp3'
 import { useEffect } from "react";
@@ -58,6 +58,10 @@ const MenuModal = (props) => {
         let volume = e.target.value
         props.setMusicVolume(volume)
     }
+    const onEffectsVolumeChange = (e) => {
+        let volume = e.target.value
+        props.setEffectsVolume(volume)
+    }
 
     if (props.menuModalStatus) {
         return (
@@ -71,6 +75,8 @@ const MenuModal = (props) => {
                 <div className={classes.volume}>
                     <p className={classes.musicVolumeText}>громкость музыки</p>
                     <input onChange={onMusicVolumeChange} className={classes.musicVolume} type="range" min="0" max="100" value={props.musicVolume} ></input>
+                    <p className={classes.effectsVolumeText}>громкость эффектов</p>
+                    <input onChange={onEffectsVolumeChange} className={classes.effectsVolume} type="range" min="0" max="100" value={props.effectsVolume} ></input>
                 </div>
             </div>
         )
@@ -84,10 +90,11 @@ const mapStateToProps = (state) => {
         menuModalStatus: state.menu.modalStatus,
         characterSelected: state.menu.characterSelected,
         gameStatus: state.data.gameStatus,
-        musicVolume: state.menu.musicVolume
+        musicVolume: state.menu.musicVolume,
+        effectsVolume: state.menu.effectsVolume
     }
 }
 
-const MenuModalContainer = connect(mapStateToProps, { setCharacterSelected, setGameStatus, setMenuModalStatus, resetSettings, setMusicVolume })(MenuModal)
+const MenuModalContainer = connect(mapStateToProps, { setCharacterSelected, setGameStatus, setMenuModalStatus, resetSettings, setMusicVolume, setEffectsVolume })(MenuModal)
 
 export { MenuModalContainer }

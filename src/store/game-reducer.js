@@ -12,6 +12,7 @@ const MOVE_LINE = 'MOVE_LINE'
 const SET_CURRENT_LINE = 'SET_CURRENT_LINE'
 const MAKE_PLAYER_INTERACTION = 'MAKE_PLAYER_INTERACTION'
 const RESET_SETTINGS = 'RESET_SETTINGS'
+const SPEED_UP = 'SPEED_UP'
 
 const CHECK_BONUS_LUCK = 'CHECK_BONUS_LUCK'
 const SET_BONUS = 'SET_BONUS'
@@ -510,6 +511,7 @@ const startState = {
         }
     ],
     bonusCounter: 9,
+    speedCounter: 0,
     newBonus: null,
 
     slowdownStatus: null,
@@ -538,7 +540,8 @@ const startState = {
     currentThirdLine: 0,
     thirdEmptyElementId: 106,
 
-    interval: 350
+    interval: 400,
+    slowdonInterval: null
 }
 
 const topEdgeElements = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211];
@@ -677,7 +680,6 @@ export const gameReducer = (state = startState, action) => {
                 let luck = getRandomNumber(0, 1)
                 if (state.score < 10) {
                     luck = 1
-                    console.log('стопудова заспавнится')
                 }
                 if (luck === 1 || luck === 0) { //не забыть удалить второе условие
                     newNewBonus = bonuses[getRandomNumber(0, 2)]
@@ -727,7 +729,8 @@ export const gameReducer = (state = startState, action) => {
                         effect: 'wideAisle'
                     }
                 ],
-                bonusCounter: 9,
+                bonusCounter: 9, 
+                speedCounter: 0,
                 newBonus: null,
 
                 slowdownStatus: null,
@@ -756,7 +759,8 @@ export const gameReducer = (state = startState, action) => {
                 currentThirdLine: 0,
                 thirdEmptyElementId: 106,
 
-                interval: 350
+                interval: 400,
+                slowdonInterval: null
             }
         }
         case MOVE_LINE: {
@@ -766,7 +770,7 @@ export const gameReducer = (state = startState, action) => {
 
             const moveLine = () => {
                 for (let i = 0; i < newLineIds.length; i++) {
-                    
+
                     if (state.currentLine === 15) {
                         newLineIds[i] = newLineIds[i] - 14
                         if (newLineIds[i] === 1000) {
@@ -822,10 +826,10 @@ export const gameReducer = (state = startState, action) => {
                     newSecondLineIds = [1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166, 181, 196, 211]
                     newSecondEmptyElementId = newSecondLineIds[randomNumber]
                     newSecondLineIds[randomNumber] = 1000
-                     if (state.wideAisleStatus === 'wideAisle' || state.wideAisleStatus === 'new wideAisle') {
-                         newSecondLineIds[randomNumber - 1] = 999
-                         newSecondLineIds[randomNumber + 1] = 1001
-                     }
+                    if (state.wideAisleStatus === 'wideAisle' || state.wideAisleStatus === 'new wideAisle') {
+                        newSecondLineIds[randomNumber - 1] = 999
+                        newSecondLineIds[randomNumber + 1] = 1001
+                    }
                 }
 
             }
@@ -843,7 +847,7 @@ export const gameReducer = (state = startState, action) => {
                         if (newThirdLineIds[i] === 1000) {
                             newThirdLineIds[i] = state.thirdEmptyElementId
                         }
-                           if (newThirdLineIds[i] === 999) {
+                        if (newThirdLineIds[i] === 999) {
                             newThirdLineIds[i] = state.thirdEmptyElementId - 15
                         }
                         if (newThirdLineIds[i] === 1001) {
@@ -884,11 +888,15 @@ export const gameReducer = (state = startState, action) => {
             let newScore = state.score
             let newBonusCounter = state.bonusCounter
             let newCurrentLine = state.currentLine
+            let newSpeedCounter = state.speedCounter
+
             const setCurrentLine = () => {
                 if (state.currentLine === 15) {
                     newScore++
                     newBonusCounter++
                     newCurrentLine = 1
+                    newSpeedCounter++
+
                 } else {
                     newCurrentLine++
                 }
@@ -917,6 +925,7 @@ export const gameReducer = (state = startState, action) => {
                     newScore++
                     newBonusCounter++
                     newCurrentSecondLine = 1
+                    newSpeedCounter++
                 } else {
                     newCurrentSecondLine++
                 }
@@ -931,6 +940,8 @@ export const gameReducer = (state = startState, action) => {
                     newScore++
                     newBonusCounter++
                     newCurrentThirdLine = 1
+                    newSpeedCounter++
+                    
                 } else {
                     newCurrentThirdLine++
                 }
@@ -938,6 +949,7 @@ export const gameReducer = (state = startState, action) => {
             if (newThirdLineStatus) {
                 setCurrentThirdLine()
             }
+            
             return {
                 ...state,
                 currentLine: newCurrentLine,
@@ -946,7 +958,8 @@ export const gameReducer = (state = startState, action) => {
                 thirdLineStatus: newThirdLineStatus,
                 currentThirdLine: newCurrentThirdLine,
                 score: newScore,
-                bonusCounter: newBonusCounter
+                bonusCounter: newBonusCounter,
+                speedCounter: newSpeedCounter
             }
         }
         case MOVE_BONUSES: {
@@ -974,30 +987,31 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_SLOWDOWN_EFFECT: {
-            let newSlowdownEffectSeconds = 20
+            let newSlowdownEffectSeconds = 15
+            let newSlowdonInterval = state.interval * 1.4
             return {
                 ...state,
-                interval: 455,
-                slowdownEffectSeconds: newSlowdownEffectSeconds
+                slowdownEffectSeconds: newSlowdownEffectSeconds,
+                slowdonInterval: newSlowdonInterval
             }
         }
         case REDUCE_TIME_SLOWDOWN_EFFECT: {
             let newSlowdownEffectSeconds = state.slowdownEffectSeconds
             let newSlowdownStatus = state.slowdownStatus
-            let newInterval = state.interval
+            let newSlowdonInterval = state.slowdonInterval
             if (state.slowdownStatus !== null) {
                 newSlowdownEffectSeconds--
             }
             if (newSlowdownEffectSeconds === -1) {
                 newSlowdownEffectSeconds = null
                 newSlowdownStatus = null
-                newInterval = 350
+                newSlowdonInterval = null
             }
             return {
                 ...state,
                 slowdownEffectSeconds: newSlowdownEffectSeconds,
                 slowdownStatus: newSlowdownStatus,
-                interval: newInterval
+                slowdonInterval: newSlowdonInterval
             }
         }
         case SET_STRENGTH_EFFECT: {
@@ -1025,13 +1039,12 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_WIDE_AISLE_EFFECT: {
-            console.log(1)
             let newWideAisleEffectSeconds = 25
             let newLineIds = state.lineIds
             let newSecondLineIds = state.secondLineIds
             let newThirdLineIds = state.thirdLineIds
 
-            for (let i = 0; i < newLineIds.length; i++){
+            for (let i = 0; i < newLineIds.length; i++) {
                 if (newLineIds[i] > 900) {
                     newLineIds[i - 1] = 999
                     newLineIds[i + 1] = 1001
@@ -1075,6 +1088,19 @@ export const gameReducer = (state = startState, action) => {
                 ...state,
                 wideAisleEffectSeconds: newWideAisleEffectSeconds,
                 wideAisleStatus: newWideAisleStatus,
+            }
+        }
+        case SPEED_UP: {
+            let newInterval = state.interval
+            let newSpeedCounter = state.speedCounter
+            if (newSpeedCounter === 5) {
+                newInterval -= 10
+                newSpeedCounter = 0
+            }
+            return {
+                ...state,
+                interval: newInterval,
+                speedCounter: newSpeedCounter
             }
         }
         default:
@@ -1154,4 +1180,8 @@ export const setWideAisleEffect = () => ({
 
 export const reduceTimeWideAisleEffect = () => ({
     type: REDUCE_TIME_WIDE_AISLE_EFFECT
+})
+
+export const speedUp = () => ({
+    type: SPEED_UP
 })

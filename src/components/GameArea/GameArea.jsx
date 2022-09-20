@@ -17,10 +17,11 @@ import {
     setStrengthEffect,
     reduceTimeStrengthEffect,
     setWideAisleEffect,
-    reduceTimeWideAisleEffect
+    reduceTimeWideAisleEffect,
+    speedUp
 } from "../../store/game-reducer";
 import { setDeathModalStatus } from "../../store/death-modal-reducer";
-import { intervals, gameMusics, slowdown, strength, wideAisle } from "../../data/data";
+import { gameMusics, slowdown, strength, wideAisle } from "../../data/data";
 import { getRandomNumber } from "../../utils/getRandomNumber";
 
 
@@ -37,19 +38,28 @@ const GameArea = (props) => {
         props.removeWasteBonus()
         props.makePlayerInteraction()
         props.checkBonusLuck()
+        props.speedUp()
     }, [props])
 
 
 
     // вызывается колбэк (первый аргумент из useEffect) при монтировании (так как пустой массив зависимостей)
     useEffect(() => {
-        const intervalId = setInterval(move, props.interval);
+        let interval;
+        if (props.slowdonInterval === null) {
+            interval = props.interval
+        } else {
+            interval = props.slowdonInterval
+        }
+        console.log('интервал:', interval)
+        
+        const intervalId = setInterval(move, interval);
         setIntervalIdToReset(intervalId)
         // эта функция вызывается при componentUnMount
         return () => {
             clearInterval(intervalId)
         }
-    }, [props.gameStatus, props.interval]);
+    }, [props.gameStatus, props.interval, props.slowdonInterval]);
 
 
     useEffect(() => {
@@ -156,13 +166,17 @@ const GameArea = (props) => {
     }
 
     useEffect(() => {
-        let factor = 1
-        let interval = intervals[getRandomNumber(0, 3)]
-        if (props.slowdownStatus === 'slowdown' || props.slowdownStatus === 'new slowdown') {
-            factor = 1.3
+        let interval
+        if (props.slowdownStatus === null) {
+            interval = props.interval
+        } else {
+            interval = props.slowdonInterval
         }
-        setTimeout(setBonus, factor * interval)
-    }, [props.newBonus])
+        let intervalId = setTimeout(setBonus, interval * getRandomNumber(1, 4))
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [props.newBonus, props.slowdownStatus])
 
 
 
@@ -212,19 +226,41 @@ const GameArea = (props) => {
         }
     }, [props.wideAisleEffectSeconds])
 
+    const effectsSound = React.useRef()
+    
+    
+    useEffect(() => {
+        if (effectsSound.current) {
+            effectsSound.current.volume = props.effectsVolume / 100
+        }
+    }, [props.gameStatus, props.effectsVolume, props.slowdownStatus, props.strengthStatus, props.wideAisleStatus])
+
+    const onMusicEnded = () => {
+        setRandomNumber(getRandomNumber(0, 9))
+    }
+
     if (props.gameStatus) {
         return (
             <div autoFocus={true} tabIndex="0" ref={area} onKeyDown={onGameKeyDown} className={classes.area}>
                 {gameAreaElements}
-                <audio ref={audio} src={gameMusics[randomNumber]} autoPlay loop muted={false} hidden></audio>
-                {props.slowdownStatus !== null &&
-                    <audio src={slowdown} autoPlay muted={false} hidden></audio>
+                <audio ref={audio} src={gameMusics[randomNumber]} onEnded={onMusicEnded} autoPlay muted={false} hidden></audio>
+                {props.slowdownStatus === 'slowdown' &&
+                    <audio ref={effectsSound} src={slowdown} autoPlay muted={false} hidden></audio>
                 }
-                {props.strengthStatus !== null &&
-                    <audio src={strength} autoPlay muted={false} hidden></audio>
+                {props.slowdownStatus === 'new slowdown' &&
+                    <audio ref={effectsSound} src={slowdown} autoPlay muted={false} hidden></audio>
                 }
-                {props.wideAisleStatus !== null &&
-                    <audio src={wideAisle} autoPlay muted={false} hidden></audio>
+                {props.strengthStatus === 'strength' &&
+                    <audio ref={effectsSound} src={strength} autoPlay muted={false} hidden></audio>
+                }
+                {props.strengthStatus === 'new strength' &&
+                    <audio ref={effectsSound} src={strength} autoPlay muted={false} hidden></audio>
+                }
+                {props.wideAisleStatus === 'wideAisle' &&
+                    <audio ref={effectsSound} src={wideAisle} autoPlay muted={false} hidden></audio>
+                }
+                {props.wideAisleStatus === 'new wideAisle' &&
+                    <audio ref={effectsSound} src={wideAisle} autoPlay muted={false} hidden></audio>
                 }
             </div>
         )
@@ -247,6 +283,7 @@ const mapStateToProps = (state) => {
         characterSelected: state.menu.characterSelected,
         gameStatus: state.data.gameStatus,
         musicVolume: state.menu.musicVolume,
+        effectsVolume: state.menu.effectsVolume,
         newBonus: state.data.newBonus,
         bonusArea: state.data.bonusArea,
         bonuses: state.data.bonuses,
@@ -254,6 +291,7 @@ const mapStateToProps = (state) => {
         strengthStatus: state.data.strengthStatus,
         wideAisleStatus: state.data.wideAisleStatus,
         interval: state.data.interval,
+        slowdonInterval: state.data.slowdonInterval,
         slowdownEffectSeconds: state.data.slowdownEffectSeconds,
         strengthEffectSeconds: state.data.strengthEffectSeconds,
         wideAisleEffectSeconds: state.data.wideAisleEffectSeconds
@@ -277,7 +315,8 @@ const GameAreaContainer = connect(mapStateToProps,
         setStrengthEffect,
         reduceTimeStrengthEffect,
         setWideAisleEffect,
-        reduceTimeWideAisleEffect
+        reduceTimeWideAisleEffect,
+        speedUp
     })(GameArea)
 
 export { GameAreaContainer }
