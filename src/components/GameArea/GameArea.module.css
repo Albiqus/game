@@ -9,25 +9,15 @@
 .element {
     width: 60px;
     height: 60px;
-    background-color: pink;
+    background-color: rgb(255, 192, 203);
 }
 
 .line {
     background-image: url(../../../public/line-block.png);
 }
 
-.slowdownLine {
-   background-image: url(../../../public/line-block-slowdown.png);
-}
-
-
-
 .slowdownEffect {
      background-image: url(../../../public/bonuses/slowdown.png);
-}
-
-.slowdownSlowdownEffect {
-     background-image: url(../../../public/bonuses/slowdown-slowdown.png.png);
 }
 
 
@@ -35,18 +25,9 @@
     background-image: url(../../../public/bonuses/strength.png);
 }
 
-.slowdownStrengthEffect {
-    background-image: url(../../../public/bonuses/strength-slowdown.png);
-}
-
 .wideAisleEffect {
     background-image: url(../../../public/bonuses/wideAisle.png);
 }
-
-.slowdownWideAisleEffect {
-    background-image: url(../../../public/bonuses/wideAisle-slowdown.png);
-}
-
 
 
 .characterRed {
@@ -63,16 +44,4 @@
 
 .slowdown{
     background-color: rgb(0, 183, 255);
-}
-
-.characterRedSlowdown{
-    background-image: url(../../../public/characters/character-red-slowdown60x60.png);
-}
-
-.characterGreenSlowdown {
-    background-image: url(../../../public/characters/character-green-slowdown60x60.png)
-}
-
-.characterBlueSlowdown{
-     background-image: url(../../../public/characters/character-blue-slowdown60x60.png)
 }

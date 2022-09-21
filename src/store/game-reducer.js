@@ -1039,7 +1039,7 @@ export const gameReducer = (state = startState, action) => {
             }
         }
         case SET_WIDE_AISLE_EFFECT: {
-            let newWideAisleEffectSeconds = 25
+            let newWideAisleEffectSeconds = 20
             let newLineIds = state.lineIds
             let newSecondLineIds = state.secondLineIds
             let newThirdLineIds = state.thirdLineIds
@@ -1096,6 +1096,9 @@ export const gameReducer = (state = startState, action) => {
             if (newSpeedCounter === 5) {
                 newInterval -= 10
                 newSpeedCounter = 0
+            }
+            if (newInterval === 250) {
+                newSpeedCounter = null
             }
             return {
                 ...state,

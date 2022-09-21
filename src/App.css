@@ -1,6 +1,7 @@
 .App {
     margin: 0 auto;
     margin-left: 400px;
+    margin-top: 20px;
     display: grid;
     grid-template-areas: "game score";
     grid-template-rows: 900px;
