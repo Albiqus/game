@@ -63,7 +63,7 @@ const GameArea = (props) => {
 
 
     useEffect(() => {
-        if (!props.menuModalStatus && !props.gameStatus) {
+        if (!props.menuModalStatus && !props.initialModalStatus && !props.gameStatus) { 
             props.setDeathModalStatus(true)
         }
     }, [props.gameStatus])
@@ -294,7 +294,8 @@ const mapStateToProps = (state) => {
         slowdonInterval: state.data.slowdonInterval,
         slowdownEffectSeconds: state.data.slowdownEffectSeconds,
         strengthEffectSeconds: state.data.strengthEffectSeconds,
-        wideAisleEffectSeconds: state.data.wideAisleEffectSeconds
+        wideAisleEffectSeconds: state.data.wideAisleEffectSeconds,
+        initialModalStatus: state.initial.modalStatus
     }
 }
 

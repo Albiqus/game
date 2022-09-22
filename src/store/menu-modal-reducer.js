@@ -4,7 +4,7 @@ const SET_MUSIC_VOLUME = 'SET_MUSIC_VOLUME'
 const SET_EFFECTS_VOLUME = 'SET_EFFECTS_VOLUME'
 
 const startState = {
-    modalStatus: true,
+    modalStatus: false,
     characterSelected: 'red',
     musicVolume: 10,
     effectsVolume: 50

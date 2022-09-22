@@ -112,7 +112,7 @@ const MenuModal = (props) => {
                         <p className={classes.headerBonuses}>бонусы</p>
                         <div className={classes.bonusesAndImageBox}>
                             <p className={classes.bonusesText}>В процессе игры будут появляться бонусы, дающие определённый эффект<br></br><br></br>
-                                В общей сумме в игре 3 бонуса</p>
+                                В общей<br></br> сумме в<br></br> игре<br></br> 3 бонуса</p>
                             <div className={classes.bonuses}>
                                 <div className={classes.slowdown}></div>
                                 <div className={classes.strength}></div>

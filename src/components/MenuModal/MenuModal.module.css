@@ -168,7 +168,7 @@
 
 .descriptionText {
     margin: 0;
-    margin-left: 60px;
+    margin-left: 90px;
     margin-right: 60px;
     margin-top: 20px;
     font-family: "gameFont";
@@ -178,7 +178,7 @@
 
 .descriptionText2 {
     margin: 0;
-    margin-right: 45px;
+    margin-left: 30px;
     padding-top: 70px;
     width: 380px;
     font-family: "gameFont";
@@ -206,7 +206,7 @@
 .headerControls {
     margin: 0;
     margin-top: 90px;
-    margin-left: 20px;
+    margin-left: 30px;
     font-family: "gameFont";
     font-size: 30px;
     line-height: 50px;
@@ -226,7 +226,7 @@
 .headerDescription {
     margin: 0;
     margin-top: 60px;
-    margin-left: 20px;
+    margin-left: 30px;
     font-family: "gameFont";
     font-size: 30px;
     line-height: 50px;
@@ -245,8 +245,8 @@
 
 .controlText {
     margin: 0;
-    margin-right: 45px;
     margin-top: 20px;
+    margin-left:30px;
     width: 380px;
     font-family: "gameFont";
     font-size: 22px;
@@ -263,7 +263,7 @@
 .headerBonuses {
     margin: 0;
     margin-top: 100px;
-    margin-left: 20px;
+    margin-left: 30px;
     font-family: "gameFont";
     font-size: 30px;
     line-height: 50px;
@@ -285,7 +285,8 @@
 .bonusesText {
     margin: 0;
     margin-top: 20px;
-    width: 380px;
+    margin-left: 10px;
+    width: 300px;
     font-family: "gameFont";
     font-size: 22px;
     line-height: 50px;
@@ -354,7 +355,7 @@
 .headerAdditionally{
         margin: 0;
         margin-top: 120px;
-        margin-left: 20px;
+        margin-left: 30px;
         font-family: "gameFont";
         font-size: 30px;
         line-height: 50px;
@@ -396,4 +397,17 @@
 cursor: pointer;
 background-color: rgb(255, 255, 255);
 transform: scale(1.2);
+}
+
+.info::-webkit-scrollbar {
+    width: 30px;
+    display: inline;
+}
+
+.info::-webkit-scrollbar-track {
+    background: rgb(255, 169, 183)
+}
+
+.info::-webkit-scrollbar-thumb {
+    background: rgb(255, 124, 146)
 }

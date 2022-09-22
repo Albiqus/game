@@ -8,6 +8,7 @@ modalStatus: false
 export const deathModalReducer = (state = startState, action) => {
     switch (action.type) {
         case SET_DEATH_MODAL_STATUS: {
+            console.log(1)
             let newModalStatus = action.status
             return {
                 ...state,

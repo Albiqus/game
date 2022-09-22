@@ -8,7 +8,6 @@ infoPageStatus: false
 export const infoPageReducer = (state = startState, action) => {
     switch (action.type) {
         case SET_INFO_PAGE_STATUS: {
-            console.log(action.status)
             return {
                 ...state,
                 infoPageStatus: action.status
