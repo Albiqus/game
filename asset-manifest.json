@@ -1,0 +1,33 @@
+{
+  "files": {
+    "main.css": "/game/static/css/main.bd4221e5.css",
+    "main.js": "/game/static/js/main.b17358cc.js",
+    "static/js/787.6a541d2d.chunk.js": "/game/static/js/787.6a541d2d.chunk.js",
+    "static/media/track10.mp3": "/game/static/media/track10.f0176619540046f51416.mp3",
+    "static/media/track3.mp3": "/game/static/media/track3.77d20108d4fd15e2b7e8.mp3",
+    "static/media/track5.mp3": "/game/static/media/track5.7625c06ebbe66e8a69c9.mp3",
+    "static/media/track6.mp3": "/game/static/media/track6.7651bc337bc3fdef28de.mp3",
+    "static/media/track7.mp3": "/game/static/media/track7.e33118c603c134d72918.mp3",
+    "static/media/track4.mp3": "/game/static/media/track4.79865a2dfcdfcd40e3d2.mp3",
+    "static/media/track1.mp3": "/game/static/media/track1.b44128b735afb6111f3a.mp3",
+    "static/media/track2.mp3": "/game/static/media/track2.f5d90f5dd199a46197d9.mp3",
+    "static/media/menu.mp3": "/game/static/media/menu.140dbf3a7ac1eb838830.mp3",
+    "static/media/track9.mp3": "/game/static/media/track9.a863289ce570474b699a.mp3",
+    "static/media/track8.mp3": "/game/static/media/track8.531b9945b1e1ec2cc068.mp3",
+    "static/media/loss.mp3": "/game/static/media/loss.7b2d004f30da1677fbf5.mp3",
+    "static/media/PressStart2P-Regular.ttf": "/game/static/media/PressStart2P-Regular.4bfcf8b92a857ee248e8.ttf",
+    "static/media/slowdown.mp3": "/game/static/media/slowdown.b15fd17725f908f3c3e2.mp3",
+    "static/media/strength.mp3": "/game/static/media/strength.3fb69181df16982c9a34.mp3",
+    "static/media/arrows.gif": "/game/static/media/arrows.a1315dee9ed59ea1dd8b.gif",
+    "static/media/demo.gif": "/game/static/media/demo.a58dd1ba3cb4beb05dca.gif",
+    "static/media/wide-aisle.mp3": "/game/static/media/wide-aisle.eb5350afff57ee34cdd1.mp3",
+    "index.html": "/game/index.html",
+    "main.bd4221e5.css.map": "/game/static/css/main.bd4221e5.css.map",
+    "main.b17358cc.js.map": "/game/static/js/main.b17358cc.js.map",
+    "787.6a541d2d.chunk.js.map": "/game/static/js/787.6a541d2d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bd4221e5.css",
+    "static/js/main.b17358cc.js"
+  ]
+}
